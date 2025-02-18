@@ -1,1 +1,10 @@
-Line, Vendor, Vendor Part #, Description, Units, Total Cost (USD)
+Line, Vendor, Vendor Part #, Description, Stats, Units, Total Cost (USD)
+1, Digikey, 2648-SC1029-ND, Raspberry Pi 2B 1GB, "Cores=4, RAM=1", 1, $35
+2, Adafruit, 5813, Raspberry Pi 5 8GB, "Cores=4, RAM=8", 1, $80
+3, Adafruit, 5812, Raspberry Pi 5 4GB, "Cores=4, RAM=4", 1, $60
+4, Adafruit, 3785, 12W PoE splitter, N/A, 1, $10.95
+5, Amazon, C6PATCH1RD, 1ft red patch cable, N/A, 4, $3.95
+6, Amazon, PSW8-2G, Real HD PoE switch, N/A, 1, $39.99
+7, waveshare, 29320, PCIe to M.2 and Poe HAT, N/A, 1, $33.99
+8, waveshare, 26399, PoE HAT for RPi 5, N/A, 1, $23.99
+
