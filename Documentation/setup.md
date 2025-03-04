@@ -17,8 +17,11 @@ according to the instructions in the box.
 * Using apt, install the following packages on the main node: htop, vim, ansible, clusterssh, tmux
 * Set up ansible inventory file `vim ~/path/ansible_hosts`. Syntax is similar to the Linux hosts file. 
 * Run `ansible -i ~/ansible_hosts all -m ping` to verify the prior step. In typical Linux fashion, ping returns pong.
-* Initial setup is complete, from here the cluster configuration is use-case specific.
 
-**Pi-Hole**
-* On a worker node, run `curl -sSL https://install.pi-hole.net | bash`
+After this, the cluster is "working" in the most basic sense. However, it lacks features which make clusters fun. I'm choosing to use Docker for my containers due to prior experience. 
 
+**Docker**
+* Install using `sudo apt install -y docker.io docker-compose`
+* Optional: add user to Docker group `sudo usermod -aG docker $USER` (reboot after this)
+* Test out Docker with a classic program `docker run hello-world`
+* Install portainer if you want a GUI to manage containers, some people may benefit more from that.
