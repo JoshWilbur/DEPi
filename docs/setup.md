@@ -1,5 +1,5 @@
 # DEPi Setup Guide
-The software stack and configuration for DEPi is here. 
+The software stack and configuration for DEPi is here. This is mostly for my own purposes in case I need to reinstall. Making it public in case it can help anyone else.
 
 **Before First Boot**
 Prior to setup, an OS must be installed on the main and worker nodes. I'm using Raspberry Pi OS Lite for all of the Pi boards, note that the Pi 2B 
@@ -18,10 +18,25 @@ according to the instructions in the box.
 * Set up ansible inventory file `vim ~/path/ansible_hosts`. Syntax is similar to the Linux hosts file. 
 * Run `ansible -i ~/ansible_hosts all -m ping` to verify the prior step. In typical Linux fashion, ping returns pong.
 
-After this, the cluster is "working" in the most basic sense. However, it lacks features which make clusters fun. I'm choosing to use Docker for my containers due to prior experience. 
+After this, the cluster is "working" in the most basic sense. However, it lacks features which make clusters fun and useful. I'm choosing to use Docker for my containers due to prior experience. Details on that and other services I installed are below.
 
 **Docker**
 * Install using `sudo apt install -y docker.io docker-compose`
 * Optional: add user to Docker group `sudo usermod -aG docker $USER` (reboot after this)
 * Test out Docker with a classic program `docker run hello-world`
 * Install portainer if you want a GUI to manage containers, some people may benefit more from that.
+
+**Technitium DNS Filtering**
+* Upgrade then install dependencies `sudo apt install -y libicu-dev libssl-dev libkrb5-3`
+* Download Technitium with Docker `docker pull technitium/dns-server:latest` then `docker volume create portainer_data`
+* Run using `docker run -d --name=technitium --restart=always -p 53:53/tcp -p 53:53/udp -p 5380:5380/tcp -v ~/Logs/technitium:/etc/dns technitium/dns-server`
+* More setup to come later
+
+**Grafana**
+Grafana has a great tutorial on their website. Rather than rewrite it here, I'll just paste the url. Note: Prometheus also needs to be installed \
+[grafana tutorial](https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/)
+[prometheus tutorial](https://prometheus.io/docs/prometheus/latest/getting_started/)
+Here is my list of metrics:
+
+
+**OpenVPN**
