@@ -4,12 +4,12 @@ Pi cluster in the making... more to come in a few weeks.
 
 **TODO**
 
-* Draft a plan for the software stack
-* Construct the cluster (add pic)
+* Picture of Cluster
 * Document progress in a log file
-* Flesh out description
+* Make README nicer
 
 # Hardware
+
 **Current Setup:**
 
 * Raspberry Pi 5, 8GB
