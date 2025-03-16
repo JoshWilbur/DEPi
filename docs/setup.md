@@ -39,4 +39,7 @@ Grafana has a great tutorial on their website. Rather than rewrite it here, I'll
 Here is my list of metrics:
 
 
-**OpenVPN**
+**WireGuard**
+* To install, run `sudo apt install wireguard wireguard-tools -y`
+* Generate public and private keys `wg genkey | tee wg_privatekey | wg pubkey > wg_publickey`
+* Follow this guide for the rest [Guide](https://wiresock.net/documentation/wireguard/config.html)
