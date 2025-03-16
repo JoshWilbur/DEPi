@@ -1,6 +1,6 @@
 # Compiler choice and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -g -lncurses
 
 # Source and header files
 SRCS = conway_gol.c

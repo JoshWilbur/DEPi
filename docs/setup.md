@@ -43,3 +43,7 @@ Here is my list of metrics:
 * To install, run `sudo apt install wireguard wireguard-tools -y`
 * Generate public and private keys `wg genkey | tee wg_privatekey | wg pubkey > wg_publickey`
 * Follow this guide for the rest [Guide](https://wiresock.net/documentation/wireguard/config.html)
+* Be sure to put the wireguard config file in /etc/wireguard/wg0.cong
+* Bring server up with `sudo wg-quick up wg0`
+* Bring server down with `sudo wg-quick down wg0`
+* Enable at boot with `sudo systemctl enable wg-quick@wg0`
