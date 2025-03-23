@@ -5,7 +5,8 @@ The software stack and configuration for DEPi is here. This is mostly for my own
 **Containers Running Currently**
 * Portainer: Management of containers
 * Technitium: DNS server
-* Netdata: 
+* Netdata: Cluster monitoring
+* Code Server: Remote code environment
 
 # DEPi Setup
 
@@ -37,7 +38,10 @@ After this, the cluster is "working" in the most basic sense. However, it lacks 
 * Install portainer if you want a GUI to manage containers, some people may benefit more from that.
 
 **Docker Compose**
-See docker-compose.yml as it contains all of my containers and setup.
+See docker-compose.yml as it contains all of my containers and setup. I'm using Docker swarm to deploy across my nodes.
+* Deploy swarm with `docker stack deploy -c docker-compose.yml DEPi-Stack`
+* Check with `docker stack services DEPi-Stack`
+* Remove swarm with `docker stack rm DEPi-Stack`
 
 **Technitium DNS Filtering**
 
