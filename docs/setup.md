@@ -1,6 +1,13 @@
-# DEPi Setup Guide
+# DEPi Software
 
 The software stack and configuration for DEPi is here. This is mostly for my own purposes in case I need to reinstall. Making it public in case it can help anyone else.
+
+**Containers Running Currently**
+* Portainer: Management of containers
+* Technitium: DNS server
+* Netdata: 
+
+# DEPi Setup
 
 **Before First Boot**
 Prior to setup, an OS must be installed on the main and worker nodes. I'm using Raspberry Pi OS Lite for all of the Pi boards, note that the Pi 2B
@@ -14,8 +21,8 @@ according to the instructions in the box.
 * Load the SSH key using `ssh-add keyname`
 * SSH into each node before continuing. **NOTE:** If the Pi 5 gives an error LED signal on startup, try re-flashing the bootloader.
 * On each node, run `sudo apt update && sudo apt upgrade -y` to update the system and packages.
-* Edit /etc/hosts with root permissions and associate IP addresses with node names.
-* Generate key pair on main node with `ssh-keygen -t rsa` then use `ssh-copy-id` for all nodes. Test SSH on all nodes before continuing.
+* Edit /etc/hosts with root permissions and associate IP addresses with node names. I used `hostname -I` on all nodes.
+* Generate key pair on main node with `ssh-keygen -t rsa` then use `ssh-copy-id` for all nodes. Ensure each node has the public key within ~/.ssh/authorized_keys
 * Using apt, install the following packages on the main node: htop, vim, ansible, clusterssh, tmux
 * Set up ansible inventory file `vim ~/path/ansible_hosts`. Syntax is similar to the Linux hosts file.
 * Run `ansible -i ~/ansible_hosts all -m ping` to verify the prior step. In typical Linux fashion, ping returns pong.
@@ -29,22 +36,25 @@ After this, the cluster is "working" in the most basic sense. However, it lacks 
 * Test out Docker with a classic program `docker run hello-world`
 * Install portainer if you want a GUI to manage containers, some people may benefit more from that.
 
+**Docker Compose**
+See docker-compose.yml as it contains all of my containers and setup.
+
 **Technitium DNS Filtering**
 
-* Upgrade then install dependencies `sudo apt install -y libicu-dev libssl-dev libkrb5-3`
-* Download Technitium with Docker `docker pull technitium/dns-server:latest` then `docker volume create portainer_data`
-* Run using `docker run -d --name=technitium --restart=always -p 53:53/tcp -p 53:53/udp -p 5380:5380/tcp -v ~/Logs/technitium:/etc/dns technitium/dns-server`
+* Settings are in docker-compose.yml
 * Upload [Blacklist](https://github.com/StevenBlack/hosts) to DNS server settings
 * Set DEPi-Main IP address as router's primary DNS server (1.1.1.1 as a backup when DEPi is down)
 * DNS filtering should be active now
 
 **Grafana**
-Grafana has a great tutorial on their website. Rather than rewrite it here, I'll just paste the url. Note: Prometheus also needs to be installed 
+Grafana has a great tutorial on their website. Rather than rewrite it here, I'll just paste the url. Note: Prometheus also needs to be installed
 [grafana tutorial](https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/)
 [prometheus tutorial](https://prometheus.io/docs/prometheus/latest/getting_started/)
 Here is my list of metrics:
 
 **WireGuard**
+I tried out two different ways to run WG. The Docker solution seemed much simpler, but leaving the manual way up for future reference.\\
+UPDATE: I'm switching to a router-based VPN for security reasons.
 
 * To install, run `sudo apt install wireguard wireguard-tools -y`
 * Generate public and private keys `wg genkey | tee wg_privatekey | wg pubkey > wg_publickey`

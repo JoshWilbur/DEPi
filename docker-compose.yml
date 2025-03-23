@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  technitium-dns-server:
+    image: technitium/dns-server
+    container_name: technitium-dns-server
+    restart: always
+    volumes:
+      - technitium_data:/etc/technitium/dns-server
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "5380:5380/tcp"
+
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    ports:
+      - "19999:19999" 
+    restart: unless-stopped
+    privileged: true 
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+
+volumes:
+  portainer_data:
+  technitium_data:

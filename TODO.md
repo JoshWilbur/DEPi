@@ -2,6 +2,12 @@
 
 Simply put, a list of things to do.
 
+**General**
+* Fix: WG, Grafana, Promethius
+* Backup config files/settings
+* Picture of Cluster
+* Make README nicer
+
 **Software**
 * Immich: Self-hosted videos/photos
 * Nextcloud: Self-hosted cloud

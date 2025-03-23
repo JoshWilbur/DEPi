@@ -2,12 +2,6 @@
 
 Pi cluster in the making... more to come in a few weeks.
 
-**TODO**
-
-* Picture of Cluster
-* Document progress in a log file
-* Make README nicer
-
 # Hardware
 
 **Current Setup:**
