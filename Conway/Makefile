@@ -1,13 +1,13 @@
 # Compiler choice and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -g -lncurses
+CFLAGS = -Wall -Wextra -g -lncurses -O3
 
 # Source and header files
-SRCS = conway_gol.c
+SRCS = conway_serial.c
 OBJS = $(SRCS:.c=.o)
 
 # Output executable name
-EXEC = gol
+EXEC = gol_serial
 
 # Make process
 all: $(EXEC)
