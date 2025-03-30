@@ -5,7 +5,7 @@ The software stack and configuration for DEPi is here. This is mostly for my own
 **Containers Running Currently**
 * Portainer: Management of containers
 * Technitium: DNS server
-* Netdata: Cluster monitoring
+* Prometheus + Grafana + Node Exporter: Cluster monitoring
 * Code Server: Remote code environment
 
 # DEPi Setup
@@ -67,3 +67,6 @@ UPDATE: I'm switching to a router-based VPN for security reasons.
 * Bring server up with `sudo wg-quick up wg0`
 * Bring server down with `sudo wg-quick down wg0`
 * Enable at boot with `sudo systemctl enable wg-quick@wg0`
+
+**Final Notes**
+Beyond this point, any further cluster setup is user dependant. 

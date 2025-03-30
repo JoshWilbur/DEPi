@@ -3,7 +3,7 @@
 Simply put, a list of things to do.
 
 **General**
-* Fix: WG, Grafana, Promethius
+* Fix: WG
 * Backup config files/settings
 * Picture of Cluster
 * Make README nicer
