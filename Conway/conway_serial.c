@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ncurses.h>
+#include <time.h>
 
 // Forward declarations
 void Init_Board(int *board, int h, int w, int prob_alive);
@@ -12,6 +13,9 @@ int Check_Neighbors(int *board, int h, int w, int y, int x);
 
 
 int main(int argc, char *argv[]){
+    // Seed RNG
+    srand(time(NULL));
+
     // Ncurses setup
     initscr();
     noecho(); // Prevent "echoing" of input to screen
@@ -41,14 +45,15 @@ int main(int argc, char *argv[]){
     // Allocate mem for current and next board state
     int *board_c  = malloc(height * width * sizeof(int));
     int *board_n  = malloc(height * width * sizeof(int));
-    Init_Board(board_c, height, width, 10);
+    Init_Board(board_c, height, width, 11);
+    Render(board_c, height, width);
 
 
     // Infinite loop to run the game
     while(1){
-        Render(board_c, height, width);
         generation++;
         Apply_Rules(board_c, board_n, height, width);
+        Render(board_n, height, width);
         usleep(1000000); // Slow down game rendering
         if (getch() == 'q') break; // Break if q is pressed
     }
@@ -74,14 +79,12 @@ void Apply_Rules(int *board_c, int *board_n, int h, int w){
             // Rule #3: If live cell has over 3 neighbors  = death by overpopulation
             // Rule #4: If dead cell has 3 live neighbors  = birth
 
-            if (cell == 1 && live_n > 2){ // Rule #1
-                board_n[y * w + x] = 0;
-            }else if (cell == 1 && (live_n == 2 || live_n == 3)){ // Rule #2
-                board_n[y * w + x] = 1;
-            }else if (cell == 1 && live_n > 3){ // Rule #3
-                board_n[y * w + x] = 0;
-            }else if (cell == 0 && live_n == 3){ // Rule #4
-                board_n[y * w + x] = 0;
+            if (cell == 1) {
+                if (live_n < 2 || live_n > 3) board_n[y * w + x] = 0;  // Rule 1
+                else board_n[y * w + x] = 1; // Rule 2
+            } else {
+                if (live_n == 3) board_n[y * w + x] = 1;  // Rule 3
+                else board_n[y * w + x] = 0; //  Rule 4
             }
         }
     }
@@ -122,7 +125,7 @@ int Check_Neighbors(int *board, int h, int w, int y, int x){
             x_check = x + xn;
 
             // Do a boundary check then increment (if neighbor)
-            if (yn >= 0 && yn < h && xn >= 0 && xn < w){
+            if (y_check >= 0 && y_check < h && x_check >= 0 && x_check < w){
                 count += board[y_check * w + x_check];
             }
         }

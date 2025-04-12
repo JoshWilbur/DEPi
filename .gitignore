@@ -1,3 +1,4 @@
 Private
 *.o
 *.out
+gol*
