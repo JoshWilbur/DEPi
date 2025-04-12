@@ -7,9 +7,13 @@
 // Forward declarations
 void Init_Board(int *board, int h, int w, int prob_alive);
 void Init_Screen(int thread_num, int height, int width);
-void Render(int *board, int h, int w);
+void Render(int *board, int h, int w, int delay);
 void Apply_Rules(int *board_c, int *board_n, int h, int w);
 int Check_Neighbors(int *board, int h, int w, int y, int x);
+
+// GLobal variables
+long generation = 0;
+int alive = 0;
 
 
 int main(int argc, char *argv[]){
@@ -17,16 +21,16 @@ int main(int argc, char *argv[]){
     srand(time(NULL));
 
     // Ncurses setup
-    initscr();
-    noecho(); // Prevent "echoing" of input to screen
-    curs_set(0); // Don't show the mouse
-    nodelay(stdscr, TRUE); // For non-blocking input
+    (void) initscr();
+    (void) noecho(); 
+    (void) curs_set(0); // Don't show the mouse
+    (void) nodelay(stdscr, TRUE); // For non-blocking input
 
     // Set up variables
-    int height = 50; 
-    int width = 25;
+    int height = 40; 
+    int width = 209;
     int thread_num = 1;
-    long generation = 0;
+    int delay = 80000;
 
     // If passed, handle arguments
     if (argc > 1){
@@ -45,23 +49,26 @@ int main(int argc, char *argv[]){
     // Allocate mem for current and next board state
     int *board_c  = malloc(height * width * sizeof(int));
     int *board_n  = malloc(height * width * sizeof(int));
-    Init_Board(board_c, height, width, 11);
-    Render(board_c, height, width);
+    Init_Board(board_c, height, width, 10);
+    Render(board_c, height, width, delay);
 
 
     // Infinite loop to run the game
     while(1){
         generation++;
         Apply_Rules(board_c, board_n, height, width);
-        Render(board_n, height, width);
-        usleep(1000000); // Slow down game rendering
+        Render(board_n, height, width, delay);
+
+        // Handle user input
         if (getch() == 'q') break; // Break if q is pressed
+        usleep(delay); // Slow down game rendering
     }
 
     // Free memory for boards and ncurses
     free(board_c);
     free(board_n);
-    endwin();
+    (void) endwin();
+    return 0;
 }
 
 // Apply GOL rules to current board, output a new board
@@ -98,16 +105,27 @@ void Apply_Rules(int *board_c, int *board_n, int h, int w){
 }
 
 // Render the board using ncurses
-void Render(int *board, int h, int w){
+void Render(int *board, int h, int w, int delay){
     clear(); // Clear screen
+    alive = 0;
 
     // Render board using a print statement
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
+    for (int y = 1; y < h; y++) {
+        for (int x = 1; x < w; x++) {
+            // Render borders
+            mvprintw(0, x, "-"); // Top
+            mvprintw(h, x, "-"); // Bottom
+            mvprintw(y, 0, "|"); // Left
+            mvprintw(y, w, "|"); // Right
+
+            // Render cells
             mvprintw(y, x, board[y * w + x] ? "O" : " ");
+            if (board[y * w + x] == 1) alive++;
         }
     }
 
+    float speed_ms = delay / 1000;
+    mvprintw(h+1, (w/3), "Generation: %ld | Alive cells: %d | Speed: %.1fms | Press 'q' to quit.", generation, alive, speed_ms);
     refresh(); // Apply changes
 }
 
