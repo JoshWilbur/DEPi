@@ -2,3 +2,4 @@ Private
 *.o
 *.out
 gol*
+*.env

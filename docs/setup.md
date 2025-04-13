@@ -50,12 +50,6 @@ See docker-compose.yml as it contains all of my containers and setup. I'm using 
 * Set DEPi-Main IP address as router's primary DNS server (1.1.1.1 as a backup when DEPi is down)
 * DNS filtering should be active now
 
-**Grafana**
-Grafana has a great tutorial on their website. Rather than rewrite it here, I'll just paste the url. Note: Prometheus also needs to be installed
-[grafana tutorial](https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/)
-[prometheus tutorial](https://prometheus.io/docs/prometheus/latest/getting_started/)
-Here is my list of metrics:
-
 **WireGuard**
 I tried out two different ways to run WG. The Docker solution seemed much simpler, but leaving the manual way up for future reference.\\
 UPDATE: I'm switching to a router-based VPN for security reasons.
