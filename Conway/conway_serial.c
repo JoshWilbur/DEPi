@@ -3,11 +3,14 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <time.h>
+#include <sys/time.h>
+
+#include "setup.c"
+
+#define DELAY_US 75000
 
 // Forward declarations
-void Init_Board(int *board, int h, int w, int prob_alive);
-void Init_Screen(int thread_num, int height, int width);
-void Render(int *board, int h, int w, int delay);
+void Render(int *board, int h, int w, int speed_us, int time_rules, int time_render, int time_loop);
 void Apply_Rules(int *board_c, int *board_n, int h, int w);
 int Check_Neighbors(int *board, int h, int w, int y, int x);
 
@@ -15,31 +18,30 @@ int Check_Neighbors(int *board, int h, int w, int y, int x);
 long generation = 0;
 int alive = 0;
 
-
 int main(int argc, char *argv[]){
-    // Seed RNG
-    srand(time(NULL));
+    // Declare variables
+    int height = 40; 
+    int width = 200;
+    int thread_num = 1;
+    int rules_time=0, render_time=0, loop_time=0;
+    struct timeval start, end, loop_start, loop_end; // For wall-clock timing
+    srand(time(NULL)); // Seed RNG
 
-    // Ncurses setup
+    // Ncurses setup (GNU recommends adding a void cast, unsure why)
     (void) initscr();
     (void) noecho(); 
     (void) curs_set(0); // Don't show the mouse
     (void) nodelay(stdscr, TRUE); // For non-blocking input
 
-    // Set up variables
-    int height = 40; 
-    int width = 209;
-    int thread_num = 1;
-    int delay = 80000;
+    // Auto-detect terminal size
+    getmaxyx(stdscr, height, width);
+    height -= 10;
+    width -= 5;
 
     // If passed, handle arguments
     if (argc > 1){
         if (argv[1] != NULL && (atoi(argv[1]) < 8) && (atoi(argv[1]) >= 1)){
             thread_num = atoi(argv[1]);
-        }
-        if (argv[2] != NULL && (atoi(argv[2]) < 100) && (atoi(argv[2]) >= 10)){
-            height = atoi(argv[2]);
-            width = height / 2;
         }
     }
 
@@ -49,19 +51,40 @@ int main(int argc, char *argv[]){
     // Allocate mem for current and next board state
     int *board_c  = malloc(height * width * sizeof(int));
     int *board_n  = malloc(height * width * sizeof(int));
+
+    // Load and render initial board
     Init_Board(board_c, height, width, 10);
-    Render(board_c, height, width, delay);
+    Render(board_c, height, width, DELAY_US, 0, 0, 0);
 
 
     // Infinite loop to run the game
     while(1){
+        gettimeofday(&loop_start, NULL);
         generation++;
+
+        // Apply rules and measure time
+        gettimeofday(&start, NULL);
         Apply_Rules(board_c, board_n, height, width);
-        Render(board_n, height, width, delay);
+        gettimeofday(&end, NULL);
+        rules_time = end.tv_usec - start.tv_usec;
+
+        // Render and measure time
+        gettimeofday(&start, NULL);
+        Render(board_n, height, width, DELAY_US, rules_time, render_time, loop_time);
+        gettimeofday(&end, NULL);
+        render_time = end.tv_usec - start.tv_usec;
+
+        // Pointer swap boards
+        int *temp_board = board_c;
+        board_c = board_n;
+        board_n = temp_board;
 
         // Handle user input
         if (getch() == 'q') break; // Break if q is pressed
-        usleep(delay); // Slow down game rendering
+
+        gettimeofday(&loop_end, NULL);
+        loop_time = loop_end.tv_usec - loop_start.tv_usec;
+        usleep(DELAY_US);
     }
 
     // Free memory for boards and ncurses
@@ -95,37 +118,37 @@ void Apply_Rules(int *board_c, int *board_n, int h, int w){
             }
         }
     }
-
-    // Update current board for next round of processing
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            board_c[y * w + x] = board_n[y * w + x];
-        }
-    }
 }
 
 // Render the board using ncurses
-void Render(int *board, int h, int w, int delay){
+void Render(int *board, int h, int w, int speed_us, int time_rules, int time_render, int time_loop){
     clear(); // Clear screen
     alive = 0;
 
-    // Render board using a print statement
-    for (int y = 1; y < h; y++) {
-        for (int x = 1; x < w; x++) {
-            // Render borders
-            mvprintw(0, x, "-"); // Top
-            mvprintw(h, x, "-"); // Bottom
-            mvprintw(y, 0, "|"); // Left
-            mvprintw(y, w, "|"); // Right
+    // Draw top and bottom borders
+    for (int x = 0; x < w+2; x++) {
+        mvprintw(0, x, "-");
+        mvprintw(h+1, x, "-");
+    }
 
-            // Render cells
-            mvprintw(y, x, board[y * w + x] ? "O" : " ");
+    // Draw left and right borders
+    for (int y = 0; y < h+2; y++) {
+        mvprintw(y, 0, "|");
+        mvprintw(y, w+1, "|");
+    }
+
+    // Render board using a print statement
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            // Render cells, offset by 1 for borders
+            mvprintw(y+1, x+1, board[y * w + x] ? "0" : " ");
             if (board[y * w + x] == 1) alive++;
         }
     }
 
-    float speed_ms = delay / 1000;
-    mvprintw(h+1, (w/3), "Generation: %ld | Alive cells: %d | Speed: %.1fms | Press 'q' to quit.", generation, alive, speed_ms);
+    float speed_ms = speed_us / 1000;
+    mvprintw(h+2, (w/3), "Generation: %ld | Population: %d | Speed: %.1fms | Press 'q' to quit.", generation, alive, speed_ms);
+    mvprintw(h+3, (w/3), "Rule time: %dus | Render time: %dus | Loop time: %dus", time_rules, time_render, time_loop);
     refresh(); // Apply changes
 }
 
@@ -149,36 +172,4 @@ int Check_Neighbors(int *board, int h, int w, int y, int x){
         }
     }
     return count; 
-}
-
-// Function to initialize the board with cells
-void Init_Board(int *board, int h, int w, int prob_alive){
-    for (int y = 0;  y < h; y++){
-        for (int x = 0; x < w; x++){
-            // Generate 1s and 0s to fill board
-            if (rand() % 100 < prob_alive){ 
-                board[y * w + x] = 1;
-            }else{
-                board[y * w + x] = 0;
-            }
-        }
-    }
-}
-
-// Very simple title screen for the game
-void Init_Screen(int thread_num, int height, int width){
-    clear(); // Clear screen
-
-    mvprintw(5, 15, "Welcome to Conway's Game of Life!");
-    mvprintw(7, 15, "Thread count: %d", thread_num);
-    mvprintw(9, 15, "Board size: %d x %d", height, width);
-    mvprintw(11, 15, "Press 's' to start");
-    mvprintw(13, 15, "Press 'q' anytime to quit the game.");
-    
-    refresh(); // Apply changes
-
-    // If 's' is pressed, continue to the game
-    while(1){
-        if (getch() == 's') break;
-    }
 }
