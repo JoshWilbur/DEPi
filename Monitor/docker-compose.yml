@@ -1,8 +1,4 @@
 services:
-  monitor:
-    build: .
-    expose:
-      - "5252"
 
   fan:
     build: ./Fan
