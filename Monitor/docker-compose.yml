@@ -1,6 +1,6 @@
 services:
 
-  fan:
+  fan: # TODO: REPLACE
     build: ./Fan
     expose:
       - "5252"
