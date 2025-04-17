@@ -10,9 +10,10 @@
 #define DELAY_US 75000
 
 // Forward declarations
-void Render(int *board, int h, int w, int speed_us, int time_rules, int time_render, int time_loop);
+void Render(int *board, int h, int w, int speed_us, int time_rules, int time_render, int time_loop, int stats_flag);
 void Apply_Rules(int *board_c, int *board_n, int h, int w);
 int Check_Neighbors(int *board, int h, int w, int y, int x);
+void Set_Board(int *board, int height, int width);
 
 // GLobal variables
 long generation = 0;
@@ -24,6 +25,7 @@ int main(int argc, char *argv[]){
     int width = 200;
     int thread_num = 1;
     int rules_time=0, render_time=0, loop_time=0;
+    int edit_flag = 0;
     struct timeval start, end, loop_start, loop_end; // For wall-clock timing
     srand(time(NULL)); // Seed RNG
 
@@ -45,16 +47,28 @@ int main(int argc, char *argv[]){
         }
     }
 
-    // Show title screen
-    Init_Screen(thread_num, height, width);
-
     // Allocate mem for current and next board state
     int *board_c  = malloc(height * width * sizeof(int));
     int *board_n  = malloc(height * width * sizeof(int));
 
-    // Load and render initial board
-    Init_Board(board_c, height, width, 10);
-    Render(board_c, height, width, DELAY_US, 0, 0, 0);
+    // Show title screen and wait
+    Init_Screen(thread_num, height, width);
+    while(1){
+        if (getch() == 's'){ // Continue with random board
+            edit_flag = 0;
+            break;
+        }
+        if (getch() == 'e'){ // Set board by hand
+            edit_flag = 1;
+            break;
+        }
+    }
+
+    // Logic to handle board initialization
+    if (edit_flag == 0) Random_Board(board_c, height, width, 10);
+    else Set_Board(board_c, height, width);
+    
+    Render(board_c, height, width, DELAY_US, 0, 0, 0, 1);
 
 
     // Infinite loop to run the game
@@ -70,7 +84,7 @@ int main(int argc, char *argv[]){
 
         // Render and measure time
         gettimeofday(&start, NULL);
-        Render(board_n, height, width, DELAY_US, rules_time, render_time, loop_time);
+        Render(board_n, height, width, DELAY_US, rules_time, render_time, loop_time, 1);
         gettimeofday(&end, NULL);
         render_time = end.tv_usec - start.tv_usec;
 
@@ -121,7 +135,7 @@ void Apply_Rules(int *board_c, int *board_n, int h, int w){
 }
 
 // Render the board using ncurses
-void Render(int *board, int h, int w, int speed_us, int time_rules, int time_render, int time_loop){
+void Render(int *board, int h, int w, int speed_us, int time_rules, int time_render, int time_loop, int stats_flag){
     clear(); // Clear screen
     alive = 0;
 
@@ -146,9 +160,11 @@ void Render(int *board, int h, int w, int speed_us, int time_rules, int time_ren
         }
     }
 
-    float speed_ms = speed_us / 1000;
-    mvprintw(h+2, (w/3), "Generation: %ld | Population: %d | Speed: %.1fms | Press 'q' to quit.", generation, alive, speed_ms);
-    mvprintw(h+3, (w/3), "Rule time: %dus | Render time: %dus | Loop time: %dus", time_rules, time_render, time_loop);
+    if (stats_flag){
+        float speed_ms = speed_us / 1000;
+        mvprintw(h+2, (w/3), "Generation: %ld | Population: %d | Speed: %.1fms | Press 'q' to quit.", generation, alive, speed_ms);
+        mvprintw(h+3, (w/3), "Rule time: %dus | Render time: %dus | Loop time: %dus", time_rules, time_render, time_loop);
+    }
     refresh(); // Apply changes
 }
 
@@ -172,4 +188,60 @@ int Check_Neighbors(int *board, int h, int w, int y, int x){
         }
     }
     return count; 
+}
+
+// Function to manually set an initial board
+void Set_Board(int *board, int h, int w){
+    // Start with an empty board
+    int x,y;
+    for (y = 1;  y < h-1; y++){
+        for (x = 1; x < w-1; x++){
+            board[y * w + x] = 0;
+        }
+    }
+    
+    // Render board without stats
+    Render(board, h, w, DELAY_US, 0, 0, 0, 0);
+    mvprintw(h+2, (w/2), "EDIT MODE");
+    mvprintw(h+3, (w/3), "Press 'c' to begin the game. Use WASD to navigate the board");
+    mvprintw(h+4, (w/3), "Press the spacebar to toggle a cell");
+
+    // Reset index variables before constructing board
+    x = w/2;
+    y = h/2;
+    while(1){
+        // Switch case for user input
+        switch(getch()){
+            case 'c': // Continue to game if c is pressed
+                return;
+            case 'w': // Move up
+                if (y > 1) y--;
+                break;
+            case 's': // Move down
+                if (y < h-1) y++;
+                break;
+            case 'a': // Move left
+                if (x > 1) x--;
+                break;
+            case 'd': // Move left
+                if (x < w-1) x++;
+                break;
+            case ' ': // Toggle cell
+                board[y * w + x] ^= 1;
+                if (board[y * w + x]) mvprintw(y+1, x+1, "0");
+                else mvprintw(y+1, x+1, " ");
+                refresh();
+                break;
+            default:
+                break;
+        }
+
+        if (!(board[y * w + x])){
+            mvprintw(y+1, x+1, "#");
+            refresh();
+            usleep(10000);
+            mvprintw(y+1, x+1, " ");
+        }
+        refresh(); // Update screen
+    }
 }
