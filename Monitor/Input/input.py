@@ -1,21 +1,24 @@
-import random
 import redis
-from flask import Flask
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379)
 
 
-@app.route('/')
-def fan():
-    return 'FAN SPEED MONITORING: Enter a device to continue\n'
+@app.route('/', methods=["GET", "POST"])
+def data_entry():
+    if request.method == "POST":
+        device_name = request.form.get("device")
+        temperature = request.form.get("temperature")
+        load = request.form.get("load")
 
+        # Post data to redis
+        cache.hset(f"device:{device_name}", mapping={
+            "temperature": temperature,
+            "load": load
+        })
 
-# Route to handle device specific statistics
-@app.route('/device')
-def fan_device():
-    fan_speed = random.randint(0, 5000)
-    return f'GPU Fan speed = {fan_speed} RPM\n'
+    return render_template("./input.html")
 
 
 if __name__ == '__main__':

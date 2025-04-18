@@ -1,7 +1,7 @@
 services:
 
-  fan: # TODO: REPLACE
-    build: ./Fan
+  data-entry: # TODO: REPLACE
+    build: ./Input
     expose:
       - "5252"
 
