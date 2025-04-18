@@ -1,7 +1,12 @@
 services:
 
-  data-entry: # TODO: REPLACE
+  data-entry:
     build: ./Input
+    expose:
+      - "5252"
+
+  aggregator:
+    build: ./Aggregator
     expose:
       - "5252"
 
