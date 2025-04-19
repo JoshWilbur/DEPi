@@ -62,6 +62,11 @@ int main(int argc, char *argv[]){
             edit_flag = 1;
             break;
         }
+        if (getch() == 'q'){ // Quit game
+            (void) endwin();
+            return 0;
+            break;
+        }
     }
 
     // Logic to handle board initialization
@@ -201,7 +206,7 @@ void Set_Board(int *board, int h, int w){
     }
     
     // Render board without stats
-    Render(board, h, w, DELAY_US, 0, 0, 0, 0);
+    Render(board, h, w, 0, 0, 0, 0, 0);
     mvprintw(h+2, (w/2), "EDIT MODE");
     mvprintw(h+3, (w/3), "Press 'c' to begin the game. Use WASD to navigate the board");
     mvprintw(h+4, (w/3), "Press the spacebar to toggle a cell");

@@ -1,6 +1,5 @@
 # Conway's Game of Life
-TODO: allow for use of text file to input board
-ncurses library used as it is faster than standard printf().
+ncurses library used as it is faster than standard printf(). Wall clock timing is used as I don't have PAPI installed on my system
 
 # Related Works:
 * [Shodor](http://www.shodor.org/media/content/petascale/materials/UPModules/GameOfLife/Life_Module_Document_pdf.pdf)

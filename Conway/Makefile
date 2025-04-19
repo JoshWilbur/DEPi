@@ -1,6 +1,7 @@
 # Compiler choice and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -g -lncurses -O3
+CFLAGS = -Wall -Wextra -g -lncurses -O3 -fopenmp
+LFLAGS = -fopenmp
 
 # Source and header files
 SRCS = conway_serial.c
