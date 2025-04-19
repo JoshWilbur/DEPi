@@ -1,12 +1,12 @@
-// Serial version of conway, measuring performance with wall-clock time
-// Compile with: gcc conway_serial.c -lncurses -o gol_serial
+// Parallel version of conway using OpenMP (OMP)
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <ncurses.h>
 #include <time.h>
-#include <sys/time.h>
 
+#include <omp.h>
+#include "papi.h"
 #include "setup.c"
 
 #define DELAY_US 75000
@@ -32,9 +32,9 @@ int main(){
     int width = 200;
     int rules_time=0, render_time=0, loop_time=0;
     int edit_flag = 0;
-    struct timeval start, end, loop_start, loop_end; // For wall-clock timing
+    int thread_num = omp_get_max_threads();
+    int start, end, loop_start, loop_end; // For PAPI timing
     srand(time(NULL)); // Seed RNG
-
 
     // Ncurses setup (GNU recommends adding a void cast, unsure why)
     (void) initscr();
@@ -47,8 +47,14 @@ int main(){
     height -= 10;
     width -= 5;
 
+    // Initialize PAPI
+    int result=PAPI_library_init(PAPI_VER_CURRENT);
+    if (result!=PAPI_VER_CURRENT){
+        fprintf(stderr,"Warning!  PAPI error %s\n", PAPI_strerror(result));
+    }
+
     // Show title screen and wait
-    Init_Screen(1, height, width);
+    Init_Screen(thread_num, height, width);
     while(1){
         if (getch() == 's'){ // Continue with random board
             edit_flag = 0;
@@ -59,7 +65,7 @@ int main(){
             break;
         }
         if (getch() == 'b'){ // Benchmark with random board
-            width = BENCHMARK_SIZE;
+            width = BENCHMARK_SIZE; // Large size so performance difference is obvious
             edit_flag = 0;
             break;
         }
@@ -80,23 +86,24 @@ int main(){
     
     Render(board_c, height, width, DELAY_US, 0, 0, 0, 1);
 
+
     // Infinite loop to run the game
     int i = 0;
     while(1){
-        gettimeofday(&loop_start, NULL);
+        loop_start = PAPI_get_real_usec();
         generation++;
 
         // Apply rules and measure time
-        gettimeofday(&start, NULL);
+        start = PAPI_get_real_usec();
         Apply_Rules(board_c, board_n, height, width);
-        gettimeofday(&end, NULL);
-        rules_time = end.tv_usec - start.tv_usec;
+        end = PAPI_get_real_usec();
+        rules_time = end - start;
 
         // Render and measure time
-        gettimeofday(&start, NULL);
+        start = PAPI_get_real_usec();
         Render(board_n, height, width, DELAY_US, rules_time, render_time, loop_time, 1);
-        gettimeofday(&end, NULL);
-        render_time = end.tv_usec - start.tv_usec;
+        end = PAPI_get_real_usec();
+        render_time = end - start;
 
         // Pointer swap boards
         int *temp_board = board_c;
@@ -106,8 +113,8 @@ int main(){
         // Handle user input
         if (getch() == 'q') break; // Break if q is pressed
 
-        gettimeofday(&loop_end, NULL);
-        loop_time = loop_end.tv_usec - loop_start.tv_usec;
+        loop_end = PAPI_get_real_usec();
+        loop_time = loop_end - loop_start;
 
         // Put data into arrays for processing
         perf_rules[i] = rules_time;
@@ -126,11 +133,12 @@ int main(){
 
 // Apply GOL rules to current board, output a new board
 void Apply_Rules(int *board_c, int *board_n, int h, int w){
-    int cell, live_n = 0;
+    int x, y, cell, live_n = 0;
 
-    // Generate next board based on neighbors
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
+    // Generate next board based on neighbors in parallel
+    #pragma omp parallel for private(x, y, cell, live_n) schedule(static)
+    for (y = 0; y < h; y++) {
+        for (x = 0; x < w; x++) {
             live_n = Check_Neighbors(board_c, h, w, y, x);
             cell = board_c[y * w + x]; // Current cell
 
@@ -181,6 +189,9 @@ void Render(int *board, int h, int w, int speed_us, int time_rules, int time_ren
         float avg_rule = 0; 
         float avg_render = 0;
         float avg_loop = 0;
+        
+        // Parallelize statistic generation
+        #pragma omp parallel for reduction(+:avg_rule, avg_render, avg_loop) schedule(static)
         for (int i = 0; i < N_STATS; i++){
             avg_rule += perf_rules[i];
             avg_render += perf_render[i];

@@ -22,7 +22,8 @@ void Init_Screen(int thread_num, int h, int w){
     mvprintw((h/3)-4, (w/3), "Thread count: %d", thread_num);
     mvprintw((h/3)-3, (w/3), "Board size: %d x %d", h, w);
     mvprintw((h/3)-2, (w/3), "Press 's' to start OR press 'e' to make board");
-    mvprintw((h/3)-1, (w/3), "Press 'q' anytime to quit the game.");
+    mvprintw((h/3)-1, (w/3), "Press 'b' to benchmark");
+    mvprintw((h/3), (w/3), "Press 'q' anytime to quit the game.");
     
     refresh(); // Apply changes
 }

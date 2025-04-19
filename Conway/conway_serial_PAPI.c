@@ -1,12 +1,11 @@
-// Serial version of conway, measuring performance with wall-clock time
-// Compile with: gcc conway_serial.c -lncurses -o gol_serial
+// Serial version of conway, measuring performance using PAPI
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <ncurses.h>
 #include <time.h>
-#include <sys/time.h>
 
+#include "papi.h"
 #include "setup.c"
 
 #define DELAY_US 75000
@@ -32,9 +31,8 @@ int main(){
     int width = 200;
     int rules_time=0, render_time=0, loop_time=0;
     int edit_flag = 0;
-    struct timeval start, end, loop_start, loop_end; // For wall-clock timing
+    int start, end, loop_start, loop_end; // For PAPI timing
     srand(time(NULL)); // Seed RNG
-
 
     // Ncurses setup (GNU recommends adding a void cast, unsure why)
     (void) initscr();
@@ -46,6 +44,14 @@ int main(){
     getmaxyx(stdscr, height, width);
     height -= 10;
     width -= 5;
+
+    // Initialize PAPI
+    int result=PAPI_library_init(PAPI_VER_CURRENT);
+    if (result!=PAPI_VER_CURRENT) {
+            fprintf(stderr,"Warning!  PAPI error %s\n",
+                    PAPI_strerror(result));
+    }
+
 
     // Show title screen and wait
     Init_Screen(1, height, width);
@@ -80,23 +86,24 @@ int main(){
     
     Render(board_c, height, width, DELAY_US, 0, 0, 0, 1);
 
+
     // Infinite loop to run the game
     int i = 0;
     while(1){
-        gettimeofday(&loop_start, NULL);
+        loop_start = PAPI_get_real_usec();
         generation++;
 
         // Apply rules and measure time
-        gettimeofday(&start, NULL);
+        start = PAPI_get_real_usec();
         Apply_Rules(board_c, board_n, height, width);
-        gettimeofday(&end, NULL);
-        rules_time = end.tv_usec - start.tv_usec;
+        end = PAPI_get_real_usec();
+        rules_time = end - start;
 
         // Render and measure time
-        gettimeofday(&start, NULL);
+        start = PAPI_get_real_usec();
         Render(board_n, height, width, DELAY_US, rules_time, render_time, loop_time, 1);
-        gettimeofday(&end, NULL);
-        render_time = end.tv_usec - start.tv_usec;
+        end = PAPI_get_real_usec();
+        render_time = end - start;
 
         // Pointer swap boards
         int *temp_board = board_c;
@@ -106,8 +113,8 @@ int main(){
         // Handle user input
         if (getch() == 'q') break; // Break if q is pressed
 
-        gettimeofday(&loop_end, NULL);
-        loop_time = loop_end.tv_usec - loop_start.tv_usec;
+        loop_end = PAPI_get_real_usec();
+        loop_time = loop_end - loop_start;
 
         // Put data into arrays for processing
         perf_rules[i] = rules_time;
