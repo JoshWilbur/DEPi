@@ -10,7 +10,7 @@
 #include "setup.c"
 
 #define DELAY_US 75000
-#define N_STATS 25
+#define N_STATS 30
 #define BENCHMARK_SIZE 200000
 
 // Forward declarations
@@ -113,14 +113,14 @@ int main(){
         // Handle user input
         if (getch() == 'q') break; // Break if q is pressed
 
-        loop_end = PAPI_get_real_usec();
-        loop_time = loop_end - loop_start;
-
         // Put data into arrays for processing
         perf_rules[i] = rules_time;
         perf_render[i] = render_time;
         perf_loop[i] = loop_time;
         i = (i + 1) % N_STATS;
+
+        loop_end = PAPI_get_real_usec();
+        loop_time = loop_end - loop_start;
         usleep(DELAY_US);
     }
 

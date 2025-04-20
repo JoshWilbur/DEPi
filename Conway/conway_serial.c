@@ -10,7 +10,7 @@
 #include "setup.c"
 
 #define DELAY_US 75000
-#define N_STATS 25
+#define N_STATS 30
 #define BENCHMARK_SIZE 200000
 
 // Forward declarations
@@ -106,14 +106,14 @@ int main(){
         // Handle user input
         if (getch() == 'q') break; // Break if q is pressed
 
-        gettimeofday(&loop_end, NULL);
-        loop_time = loop_end.tv_usec - loop_start.tv_usec;
-
         // Put data into arrays for processing
         perf_rules[i] = rules_time;
         perf_render[i] = render_time;
         perf_loop[i] = loop_time;
         i = (i + 1) % N_STATS;
+
+        gettimeofday(&loop_end, NULL);
+        loop_time = loop_end.tv_usec - loop_start.tv_usec;
         usleep(DELAY_US);
     }
 

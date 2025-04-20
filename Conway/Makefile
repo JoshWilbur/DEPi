@@ -6,6 +6,7 @@ CFLAGS = -Wall -Wextra -g -lncurses -O3 -fopenmp -I/${PAPI_DIR}/include -L/${PAP
 SRCS_SERIAL = conway_serial.c
 SRCS_SERIAL_PAPI = conway_serial_PAPI.c
 SRCS_OMP = conway_omp.c
+
 OBJS_SERIAL = $(SRCS_SERIAL:.c=.o)
 OBJS_SERIAL_PAPI = $(SRCS_SERIAL_PAPI:.c=.o)
 OBJS_OMP = $(SRCS_OMP:.c=.o)
@@ -26,7 +27,7 @@ $(EXEC_SERIAL): $(OBJS_SERIAL)
 $(EXEC_SERIAL_PAPI): $(OBJS_SERIAL_PAPI)
 	$(CC) -o $@ $^ $(CFLAGS)
 
-# Build parallel binary
+# Build OpenMP binary
 $(EXEC_OMP): $(OBJS_OMP)
 	$(CC) -o $@ $^ $(CFLAGS)
 
