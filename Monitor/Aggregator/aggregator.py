@@ -1,16 +1,17 @@
 import redis
-from flask import Flask, render_template, request
+from flask import Flask
 
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
 
-@app.route('/', methods=['GET'])
+
+@app.route("/", methods=["GET"])
 def aggregator():
     devices = cache.keys("device:*")
     output = "<h2>TEST</h2>"
     for d in devices:
         data = cache.hgetall(d)
-        output += f"<p><b>{d}</b>: Temp={data.get('temperature')}, Load={data.get('load')}</p>"
+        output += f"<p><b>{d}</b>: Temp={data.get('temperature')}, Load={data.get('load')}, Time={data.get('time')}</p>"
     return output
 
 

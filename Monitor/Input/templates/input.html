@@ -1,21 +1,16 @@
 <!doctype html>
+<html>
 <head>
     <title>Resource Monitor Entry</title>
 </head>
 
 <body>
     <h2>Enter Device Data</h2>
-    <form method="POST">
-        <label>Device Name:</label>
-        <input type="text" name="device"><br><br>
-
-        <label>Temperature (C):</label>
-        <input type="text" name="temperature"><br><br>
-
-        <label>Load (%):</label>
-        <input type="text" name="load"><br><br>
-
-        <button type="submit">POST</button>
+    <form method="POST" action="/submit_data">
+        Device Name: <input type="text" name="device"><br><br>
+        Temperature (C):<input type="text" name="temperature"><br><br>
+        Load (%):<input type="text" name="load"><br><br>
+        <input type="submit" value="Submit">
     </form>
 </body>
 </html>

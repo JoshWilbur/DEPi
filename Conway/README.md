@@ -14,7 +14,7 @@ My desktop has a Ryzen 3600 (6 cores, 12 threads) and 16GB of DDR4 memory. Haswe
 average computation time for the rules and loop using a circular buffer (N=30). The averages seemed to stabilize after 50 generations, so I documented
 my calculated averages at the 60th generation.
 
-Results from benchmarking are in the tables below. I
+Results from benchmarking are in the tables below.
 
 **Desktop PC**
 

@@ -1,24 +1,31 @@
 import redis
+import time
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 
-@app.route('/', methods=["GET", "POST"])
+@app.route("/")
+def index():
+    return "Welcome to the data entry service! Please go to /submit_data"
+
+
+@app.route("/submit_data", methods=["GET", "POST"])
 def data_entry():
     if request.method == "POST":
-        device_name = request.form.get("device")
+        device = request.form.get("device")
         temperature = request.form.get("temperature")
         load = request.form.get("load")
 
         # Ensure temp and load data are numbers, then post
         if temperature.isnumeric() and load.isnumeric():
-            cache.hset(f"device:{device_name}", mapping={
+            cache.hset(f"device:{device}", mapping={
                 "temperature": temperature,
-                "load": load
+                "load": load,
+                "time": time.time()
             })
-            return f"{device_name} data posted successfully"
+            return f"{device} data posted successfully"
         else:
             return "Error saving data"
 

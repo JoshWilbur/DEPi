@@ -1,7 +1,7 @@
 # System Monitor Project
 Name: Joshua Wilbur
 
-This project contains code to run a system monitor for a Linux-based computer. More to come...
+This project contains code to run a resource monitor for a Linux-based computer. More to come...
 
 # Operating Instructions
 TBD
