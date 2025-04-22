@@ -17,6 +17,7 @@ def submit_data():
     temperature = request.form["temperature"]
     load = request.form["load"]
 
+    # Load data into dictionary
     data = {
         "device": device,
         "temperature": temperature,
@@ -38,6 +39,14 @@ def submit_data():
                 <a href="/input"><button>Back to Input</button></a>
                 """
 
+
+@app.route("/clear_data")
+def clear_data():
+    cache.flushdb()
+    return """
+            <p>Data cleared successfully</p>
+            <a href="/input"><button>Back to Input</button></a>
+             """
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5252)

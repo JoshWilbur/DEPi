@@ -13,12 +13,16 @@ def home():
 # TODO: format output better
 @app.route("/aggregator", methods=["GET"])
 def aggregator():
-    devices = cache.keys("device:*")
-    output = "<h2>TEST</h2>"
-    for d in devices:
-        data = cache.hgetall(d)
-        output += f"<p><b>{d}</b>: Temp={data.get('temperature')}, Load={data.get('load')}, Time={data.get('time')}</p>"
+    keys = cache.keys("*")
+    output = "<h2>Aggregator</h2>"
+    if not keys:
+        output += "<p>No data available.</p>"
+    else:
+        for key in keys:
+            data = cache.hgetall(key)
+            output += f"<p><b>{key}</b>: Temp={data.get('temperature')}, Load={data.get('load')}, Time={data.get('time')}</p>"
     return output
+
 
 
 if __name__ == '__main__':

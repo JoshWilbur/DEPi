@@ -12,9 +12,13 @@ def welcome():
 
 @app.route("/f2c")
 def F_to_C():
-    return "This endpoint will convert fahrenheit to celsius"
+    return "This route will convert fahrenheit to celsius"
 
 
 @app.route("/c2f")
 def C_to_F():
-    return "This endpoint will convert celsius to fahrenheit"
+    return "This route will convert celsius to fahrenheit"
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5252)

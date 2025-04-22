@@ -14,6 +14,11 @@ services:
     expose:
       - "5252"
 
+  unit:
+    build: ./Unit-Converter
+    expose:
+      - "5252"
+
   nginx:
     image: nginx:latest
     ports:
@@ -24,6 +29,7 @@ services:
       - input
       - aggregator
       - stats
+      - unit
 
   redis:
     image: "redis"
