@@ -1,6 +1,5 @@
 services:
-
-  data-entry:
+  input:
     build: ./Input
     expose:
       - "5252"
@@ -10,12 +9,21 @@ services:
     expose:
       - "5252"
 
+  stats:
+    build: ./Statistics
+    expose:
+      - "5252"
+
   nginx:
     image: nginx:latest
     ports:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - input
+      - aggregator
+      - stats
 
   redis:
     image: "redis"

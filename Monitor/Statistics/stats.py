@@ -23,3 +23,7 @@ def maximum():
 @app.route("/<device>/<data>/mean")
 def mean():
     return "This endpoint will calculate the mean value for a data set on a device"
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5252)
