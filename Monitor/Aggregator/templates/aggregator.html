@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+    <title>Aggregator</title>
+</head>
+<body>
+    <h1>Aggregator</h1>
+
+    {% if devices %}
+        {% for device, data in devices.items() %}
+            <div class="device">
+                <b>{{ device }}</b><br>
+                <div>Temperature: {{ data.temperature or 'N/A' }}</div>
+                <div>Load: {{ data.load or 'N/A' }}</div>
+                <div>Time: {{ data.time or 'N/A' }}</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No data found.</p>
+    {% endif %}
+
+    <a href="/"><button>Home</button></a>
+    <a href="/input"><button>User Input</button></a>
+    <a href="/update"><button>Update</button></a>
+</body>
+</html>
