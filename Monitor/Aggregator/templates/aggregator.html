@@ -10,13 +10,14 @@
         {% for device, data in devices.items() %}
             <div class="device">
                 <b>{{ device }}</b><br>
-                <div>Temperature: {{ data.temperature or 'N/A' }}</div>
-                <div>Load: {{ data.load or 'N/A' }}</div>
-                <div>Time: {{ data.time or 'N/A' }}</div>
+                <div>Celsius: {{ data.temperature or 'N/A' }}</div>
+                <div>Fahrenheit: {{ data.conv_temp or 'N/A' }}</div>
+                <div>Load: {{ data.load or 'N/A' }}%</div>
+                <div>Time: {{ data.time or 'N/A' }}</div><br>
             </div>
         {% endfor %}
     {% else %}
-        <p>No data found.</p>
+        <p>No data found</p>
     {% endif %}
 
     <a href="/"><button>Home</button></a>

@@ -35,7 +35,7 @@ def submit_data():
                 """
     else:
         return """
-                Error saving data! Ensure temperature and load are numbers
+                <p>Error saving data! Ensure temperature and load are numbers</p>
                 <a href="/input"><button>Back to Input</button></a>
                 """
 

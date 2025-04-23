@@ -1,8 +1,10 @@
 import redis
+import requests
 from flask import Flask, render_template, redirect
 
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
+stored_devices = {}
 
 
 @app.route("/")
@@ -12,20 +14,44 @@ def home():
 
 @app.route("/aggregator", methods=["GET"])
 def aggregator():
-    keys = cache.keys("*")
-    devices = {}
-    for key in keys:
-        data = cache.hgetall(key)
-        devices[key] = {
-            "temperature": data.get("temperature"),
-            "load": data.get("load"),
-            "time": data.get("time")
-        }
-    return render_template("aggregator.html", devices=devices)
+    return render_template("aggregator.html", devices=stored_devices)
 
 
 @app.route("/update", methods=["GET"])
 def update_readings():
+    global stored_devices
+    keys = cache.keys("*")
+    devices = {}
+
+    for key in keys:
+        data = cache.hgetall(key)
+        temp = data.get("temperature")
+        time = data.get("time")
+
+        # Convert temperature to fahrenheit
+        if temp:
+            response = requests.post("http://unit:5252/convert_c2f", data={"temperature": temp})
+            if response.status_code == 200:
+                converted = response.text
+            else:
+                converted = "failed"
+        
+        # Convert raw time to something readable
+        if time:
+            response = requests.post("http://unit:5252/convert_time", data={"time": time})
+            if response.status_code == 200:
+                readable_time = response.text
+            else:
+                readable_time = "failed"
+
+        devices[key] = {
+            "temperature": data.get("temperature"),
+            "conv_temp": converted,
+            "load": data.get("load"),
+            "time": readable_time
+        }
+    
+    stored_devices = devices
     return redirect("/aggregator")
 
 

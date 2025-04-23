@@ -10,17 +10,17 @@ def all_stats():
     return "This page will display recently calculated stats"
 
 
-@app.route("/<device>/<data>/min")
+@app.route("/device/<device>/min")
 def minimum():
     return "This endpoint will calculate the minimum value for a data set on a device"
 
 
-@app.route("/<device>/<data>/max")
+@app.route("/device/<device>/max")
 def maximum():
     return "This endpoint will calculate the maximum value for a data set on a device"
 
 
-@app.route("/<device>/<data>/mean")
+@app.route("/device/<device>/mean")
 def mean():
     return "This endpoint will calculate the mean value for a data set on a device"
 
