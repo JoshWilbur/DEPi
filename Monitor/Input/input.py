@@ -16,18 +16,19 @@ def submit_data():
     device = request.form["device"]
     temperature = request.form["temperature"]
     load = request.form["load"]
+    timestamp = time.time()
+    key = f"{device}@{int(timestamp)}" # Unique key
 
     # Load data into dictionary
     data = {
-        "device": device,
         "temperature": temperature,
         "load": load,
-        "time": time.time()
+        "time": timestamp
     }
 
     # Ensure temp and load data are numbers, then post
     if temperature.isnumeric() and load.isnumeric():
-        cache.hset(device, mapping=data)
+        cache.hset(key, mapping=data)
         return """
                 <p>Data posted successfully</p>
                 <a href="/aggregator"><button>Go to Aggregator</button></a>
