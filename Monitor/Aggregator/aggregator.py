@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect
 
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
-stored_devices = {}
+devices = {}
 
 
 @app.route("/")
@@ -14,15 +14,12 @@ def home():
 
 @app.route("/aggregator", methods=["GET"])
 def aggregator():
-    return render_template("aggregator.html", devices=stored_devices)
+    return render_template("aggregator.html", devices=devices)
 
 
 @app.route("/update", methods=["GET"])
 def update_readings():
-    global stored_devices
     keys = cache.keys("*")
-    devices = {}
-
     for key in keys:
         data = cache.hgetall(key)
         temp = data.get("temperature")
@@ -51,7 +48,6 @@ def update_readings():
             "time": readable_time
         }
     
-    stored_devices = devices
     return redirect("/aggregator")
 
 
