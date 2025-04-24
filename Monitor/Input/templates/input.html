@@ -7,7 +7,13 @@
 <body>
     <h2>Enter Device Data</h2>
     <form method="POST" action="/submit_data">
-        Device Name: <input type="text" name="device"><br><br>
+        <label for="device">Choose a device:</label>
+        <select name="device" id="device">
+            <option value="CPU">CPU</option>
+            <option value="GPU">GPU</option>
+            <option value="RAM">RAM</option>
+            <option value="Power Supply">Power Supply</option>
+        </select><br><br>
         Temperature (C):<input type="text" name="temperature"><br><br>
         Load (%):<input type="text" name="load"><br><br>
         <input type="submit" value="Submit"><br><br>

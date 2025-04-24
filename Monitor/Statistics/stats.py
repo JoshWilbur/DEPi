@@ -50,5 +50,14 @@ def mean(device, metric):
     return f"{mean}"
 
 
+@app.route("/device/<device>/<metric>/range")
+def range(device, metric):
+    min_stat = minimum(device, metric)
+    max_stat = maximum(device, metric)
+    range_stat = max_stat-min_stat
+    return f"{range_stat}"
+
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5252)
