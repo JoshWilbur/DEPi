@@ -9,7 +9,7 @@ devices = {}
 
 @app.route("/")
 def home():
-    return render_template("./home.html")
+    return render_template("home.html")
 
 
 @app.route("/aggregator", methods=["GET"])
@@ -20,9 +20,12 @@ def aggregator():
 @app.route("/update", methods=["GET"])
 def update_readings():
     keys = cache.keys("*")
+    devices.clear()
+
     for key in keys:
         data = cache.hgetall(key)
         temp = data.get("temperature")
+        speed = data.get("speed")
         time = data.get("time")
 
         # Convert temperature to fahrenheit
@@ -45,9 +48,9 @@ def update_readings():
             "temperature": data.get("temperature"),
             "conv_temp": converted,
             "load": data.get("load"),
+            "speed": speed,
             "time": readable_time
         }
-    
     return redirect("/aggregator")
 
 

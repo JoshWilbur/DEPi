@@ -20,7 +20,21 @@ def get_data(device, metric):
 
 @app.route("/")
 def all_stats():
-    return "This page will display recently calculated stats"
+    return """
+        <p>These buttons direct you to each device's statistics</p><br>
+        <a href="/stats/device/cpu"><button>CPU Statistics</button></a>
+        <a href="/stats/device/gpu"><button>GPU Statistics</button></a>
+        <a href="/stats/device/ram"><button>RAM Statistics</button></a>
+        <a href="/"><button>Back</button></a>
+    """
+
+
+@app.route("/device/<device>")
+def device_stats(device):
+    temp_data = get_data(device, temperature)
+    load_data = get_data(device, load)
+    speed_data = get_data(device, speed) # TODO: finish
+    return "This page will show all stats for a given device"
 
 
 @app.route("/device/<device>/<metric>/min")
@@ -51,11 +65,14 @@ def mean(device, metric):
 
 
 @app.route("/device/<device>/<metric>/range")
-def range(device, metric):
-    min_stat = minimum(device, metric)
-    max_stat = maximum(device, metric)
-    range_stat = max_stat-min_stat
-    return f"{range_stat}"
+def range_stat(device, metric):
+    metric_data = get_data(device, metric)
+    if not metric_data:
+        return "No data found"
+    min_val = min(metric_data)
+    max_val = max(metric_data)
+    range_val = max_val-min_val
+    return f"{range_val}"
 
 
 

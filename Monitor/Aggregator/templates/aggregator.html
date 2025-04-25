@@ -5,7 +5,12 @@
 </head>
 <body>
     <h1>Aggregator</h1>
-
+    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 40px;">
+        <a href="/"><button style="margin: 5px;">Home</button></a>
+        <a href="/input"><button style="margin: 5px;">User Input</button></a>
+        <a href="/update"><button style="margin: 5px;">Update</button></a>
+    </div>
+    <p>Latest Readings:</p>
     {% if devices %}
         {% for device, data in devices.items() %}
             <div class="device">
@@ -13,15 +18,12 @@
                 <div>Celsius: {{ data.temperature or 'N/A' }}</div>
                 <div>Fahrenheit: {{ data.conv_temp or 'N/A' }}</div>
                 <div>Load: {{ data.load or 'N/A' }}%</div>
+                <div>Clock Speed: {{ data.speed or 'N/A' }} MHZ</div>
                 <div>Time: {{ data.time or 'N/A' }}</div><br>
             </div>
         {% endfor %}
     {% else %}
         <p>No data found</p>
     {% endif %}
-
-    <a href="/"><button>Home</button></a>
-    <a href="/input"><button>User Input</button></a>
-    <a href="/update"><button>Update</button></a>
 </body>
 </html>

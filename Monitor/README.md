@@ -1,10 +1,11 @@
 # System Monitor Project
 Name: Joshua Wilbur
 
-This project contains code to run a resource monitor for a Linux-based computer. More to come...
+This project contains code to run a resource monitor for a Linux-based computer.
 
 # Operating Instructions
-TBD
+* Run `docker compose up --build`
+* On a browser, access your remote device's IP address (or localhost if self-hosting)
 
 # References
 Besides class notes and assignments, I accessed the following links for help.
