@@ -13,34 +13,34 @@ def index():
 
 @app.route("/submit_data", methods=["POST"])
 def submit_data():
-    device = request.form["device"]
-    temperature = request.form["temperature"]
-    load = request.form["load"]
-    speed = request.form["speed"]
-    timestamp = time.time()
-    key = f"{device}@{int(timestamp)}" # Unique key
+    try:
+        device = request.form["device"]
+        temperature = float(request.form["temperature"])
+        load = float(request.form["load"])
+        speed = float(request.form["speed"])
+        timestamp = time.time()
 
-    # Load data into dictionary
-    data = {
-        "temperature": temperature,
-        "load": load,
-        "speed": speed,
-        "time": timestamp
-    }
+        # Load data into dictionary
+        data = {
+            "temperature": temperature,
+            "load": load,
+            "speed": speed,
+            "time": timestamp
+        }
 
-    # Ensure temp and load data are numbers, then post
-    if temperature.isnumeric() and load.isnumeric() and speed.isnumeric():
+        key = f"{device}@{int(timestamp)}"  # Unique key
         cache.hset(key, mapping=data)
         return """
-                <p>Data posted successfully</p>
-                <a href="/aggregator"><button>Go to Aggregator</button></a>
-                <a href="/input"><button>Back to Input</button></a>
-                """
-    else:
+            <p>Data posted successfully</p>
+            <a href="/aggregator"><button>Go to Aggregator</button></a>
+            <a href="/input"><button>Back to Input</button></a>
+        """ 
+    except ValueError:
         return """
-                <p>Error saving data! Ensure all inputs are integers</p>
-                <a href="/input"><button>Back to Input</button></a>
-                """
+            <p>Error saving data! Ensure all inputs are numerical</p>
+            <a href="/input"><button>Back to Input</button></a>
+        """
+
 
 
 @app.route("/clear_data")

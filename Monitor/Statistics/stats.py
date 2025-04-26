@@ -1,5 +1,5 @@
 import redis
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
@@ -25,55 +25,30 @@ def all_stats():
         <a href="/stats/device/cpu"><button>CPU Statistics</button></a>
         <a href="/stats/device/gpu"><button>GPU Statistics</button></a>
         <a href="/stats/device/ram"><button>RAM Statistics</button></a>
-        <a href="/"><button>Back</button></a>
+        <a href="/"><button>Home</button></a>
     """
 
 
 @app.route("/device/<device>")
 def device_stats(device):
-    temp_data = get_data(device, temperature)
-    load_data = get_data(device, load)
-    speed_data = get_data(device, speed) # TODO: finish
-    return "This page will show all stats for a given device"
+    metrics = ["temperature", "load", "speed"]
+    stats_dict = {}
 
+    for m in metrics:
+        data = get_data(device, m)
+        if data:
+            stats_dict[m] = {
+                "device": device,
+                "stat": m,
+                "minimum": min(data),
+                "maximum": max(data),
+                "mean": sum(data) / len(data),
+                "range": max(data) - min(data)
+            }
+        else:
+            stats_dict[m] = "No data found"
 
-@app.route("/device/<device>/<metric>/min")
-def minimum(device, metric):
-    metric_data = get_data(device, metric)
-    if not metric_data:
-        return "No data found"
-    minimum = min(metric_data)
-    return f"{minimum}"
-
-
-@app.route("/device/<device>/<metric>/max")
-def maximum(device, metric):
-    metric_data = get_data(device, metric)
-    if not metric_data:
-        return "No data found"
-    maximum = max(metric_data)
-    return f"{maximum}"
-
-
-@app.route("/device/<device>/<metric>/mean")
-def mean(device, metric):
-    metric_data = get_data(device, metric)
-    if not metric_data:
-        return "No data found"
-    mean = sum(metric_data) / len(metric_data)
-    return f"{mean}"
-
-
-@app.route("/device/<device>/<metric>/range")
-def range_stat(device, metric):
-    metric_data = get_data(device, metric)
-    if not metric_data:
-        return "No data found"
-    min_val = min(metric_data)
-    max_val = max(metric_data)
-    range_val = max_val-min_val
-    return f"{range_val}"
-
+    return render_template("stats.html", stats_dict=stats_dict)
 
 
 if __name__ == '__main__':

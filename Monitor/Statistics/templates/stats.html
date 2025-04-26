@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <title>Statistics</title>
+</head>
+<body>
+    <h1>Device Statistics</h1>
+    <a href="/stats"><button style="margin: 5px;">Back</button></a>
+    <p>Metrics:</p>
+    {% if stats_dict %}
+        {% for metric, data in stats_dict.items() %}
+            <div class="device">
+                {% if data == 'No data found' %}
+                    <div>Metric: {{ metric }}</div>
+                    <div>No data found</div><br>
+                {% else %}
+                    <div>Device: {{ data.device or 'N/A' }}</div>
+                    <div>Metric: {{ data.stat or 'N/A' }}</div>
+                    <div>Minimum: {{ data.minimum or 'N/A' }}</div>
+                    <div>Maximum: {{ data.maximum or 'N/A' }}</div>
+                    <div>Mean: {{ data.mean or 'N/A' }}</div>
+                    <div>Range: {{ data.range or 'N/A' }}</div><br>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No data found</p>
+    {% endif %}
+</body>
+</html>
