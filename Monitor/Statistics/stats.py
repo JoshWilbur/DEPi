@@ -22,17 +22,23 @@ def get_data(device, metric):
 def all_stats():
     return """
         <p>These buttons direct you to each device's statistics</p><br>
-        <a href="/stats/device/cpu"><button>CPU Statistics</button></a>
-        <a href="/stats/device/gpu"><button>GPU Statistics</button></a>
-        <a href="/stats/device/ram"><button>RAM Statistics</button></a>
+        <a href="/stats/device/CPU"><button>CPU Statistics</button></a>
+        <a href="/stats/device/GPU"><button>GPU Statistics</button></a>
+        <a href="/stats/device/RAM"><button>RAM Statistics</button></a>
         <a href="/"><button>Home</button></a>
     """
 
 
 @app.route("/device/<device>")
+def show_stats(device):
+    stats = device_stats(device)
+    return render_template("stats.html", stats_dict=stats)
+
+
+@app.route("/device/<device>/get")
 def device_stats(device):
-    metrics = ["temperature", "load", "speed"]
     stats_dict = {}
+    metrics = ["temperature", "load", "speed"]
 
     for m in metrics:
         data = get_data(device, m)
@@ -42,13 +48,13 @@ def device_stats(device):
                 "stat": m,
                 "minimum": min(data),
                 "maximum": max(data),
-                "mean": sum(data) / len(data),
+                "mean": round(sum(data) / len(data), 2),
                 "range": max(data) - min(data)
             }
         else:
             stats_dict[m] = "No data found"
 
-    return render_template("stats.html", stats_dict=stats_dict)
+    return stats_dict
 
 
 if __name__ == '__main__':

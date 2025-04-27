@@ -1,12 +1,11 @@
 <!doctype html>
 <html>
 <head>
-    <title>Statistics</title>
+    <title>Device Statistics</title>
 </head>
 <body>
     <h1>Device Statistics</h1>
     <a href="/stats"><button style="margin: 5px;">Back</button></a>
-    <p>Metrics:</p>
     {% if stats_dict %}
         {% for metric, data in stats_dict.items() %}
             <div class="device">

@@ -3,27 +3,52 @@
 <head>
     <title>Aggregator</title>
 </head>
+
 <body>
     <h1>Aggregator</h1>
-    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 40px;">
-        <a href="/"><button style="margin: 5px;">Home</button></a>
-        <a href="/input"><button style="margin: 5px;">User Input</button></a>
-        <a href="/update"><button style="margin: 5px;">Update</button></a>
-    </div>
-    <p>Latest Readings:</p>
+    <a href="/"><button style="margin: 5px;">Home</button></a>
+    <a href="/input"><button style="margin: 5px;">User Input</button></a><br>
+    <a href="/update"><button style="margin: 5px;">Update</button></a>
+    <h2>Latest Readings:</h2>
     {% if devices %}
         {% for device, data in devices.items() %}
-            <div class="device">
-                <b>{{ device }}</b><br>
-                <div>Celsius: {{ data.temperature or 'N/A' }}</div>
-                <div>Fahrenheit: {{ data.conv_temp or 'N/A' }}</div>
-                <div>Load: {{ data.load or 'N/A' }}%</div>
-                <div>Clock Speed: {{ data.speed or 'N/A' }} MHZ</div>
-                <div>Time: {{ data.time or 'N/A' }}</div><br>
-            </div>
+            <b>{{ device }}</b><br>
+            <div>Temperature: {{ data.temperature or 'N/A' }}°C</div>
+            <div>Temperature: {{ data.conv_temp or 'N/A' }}°F</div>
+            <div>Load: {{ data.load or 'N/A' }}%</div>
+            <div>Clock Speed: {{ data.speed or 'N/A' }} MHZ</div>
+            <div>Time: {{ data.time or 'N/A' }}</div><br>
         {% endfor %}
     {% else %}
-        <p>No data found</p>
+        <p>No device readings found</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Statistics:</h2>
+    {% if stats_data %}
+        {% for device, stats in stats_data.items() %}
+            {% if stats.temperature.maximum %}
+                <h3>{{ device }} Stats:</h3>
+                <p><strong>Temperature:</strong></p>
+                    <div>Max: {{ stats.temperature.maximum }}°C </div>
+                    <div>Min: {{ stats.temperature.minimum }}°C </div>
+                    <div>Mean: {{ stats.temperature.mean }}°C </div>
+                    <div>Range: {{ stats.temperature.range }}°C </div>
+                <p><strong>Load:</strong></p>
+                    <div>Max: {{ stats.load.maximum }}% </div>
+                    <div>Min: {{ stats.load.minimum }}% </div>
+                    <div>Mean: {{ stats.load.mean }}% </div>
+                    <div>Range: {{ stats.load.range }}% </div>
+                <p><strong>Speed:</strong></p>
+                    <div>Max: {{ stats.speed.maximum }} MHz </div>
+                    <div>Min: {{ stats.speed.minimum }} MHz </div>
+                    <div>Mean: {{ stats.speed.mean }} MHz </div>
+                    <div>Range: {{ stats.speed.range }} MHz </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>No stats found</p>
     {% endif %}
 </body>
 </html>

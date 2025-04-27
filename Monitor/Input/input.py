@@ -28,17 +28,22 @@ def submit_data():
             "time": timestamp
         }
 
-        key = f"{device}@{int(timestamp)}"  # Unique key
+        key = f"{device}@{int(timestamp)}" # Unique key
         cache.hset(key, mapping=data)
-        return """
-            <p>Data posted successfully</p>
-            <a href="/aggregator"><button>Go to Aggregator</button></a>
-            <a href="/input"><button>Back to Input</button></a>
+        return f"""
+            <p>Data posted successfully! Received the following:</p>
+            Device: {device}<br>
+            Temperature: {temperature}<br>
+            Load: {load}<br>
+            Clock Speed: {speed}<br>
+            Timestamp: {timestamp}<br><br>
+            <a href="/aggregator"><button>Aggregator</button></a>
+            <a href="/input"><button>Back</button></a>
         """ 
     except ValueError:
         return """
             <p>Error saving data! Ensure all inputs are numerical</p>
-            <a href="/input"><button>Back to Input</button></a>
+            <a href="/input"><button>Back</button></a>
         """
 
 
@@ -48,13 +53,16 @@ def clear_data():
     cache.flushall()
     return """
             <p>Data cleared successfully</p>
-            <a href="/input"><button>Back to Input</button></a>
+            <a href="/input"><button>Back</button></a>
              """
 
 @app.route("/debug")
 def debug():
     keys = cache.keys("*")
-    return f"{keys}"
+    return f"""
+            {keys}<br><br>
+            <a href="/input"><button>Back</button></a>
+            """
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5252)

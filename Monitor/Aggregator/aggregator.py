@@ -1,10 +1,11 @@
 import redis
 import requests
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
 devices = {}
+stats_data = {}
 
 
 @app.route("/")
@@ -14,13 +15,23 @@ def home():
 
 @app.route("/aggregator", methods=["GET"])
 def aggregator():
-    return render_template("aggregator.html", devices=devices)
+    return render_template("aggregator.html", devices=devices, stats_data=stats_data)
 
 
-@app.route("/update", methods=["GET"])
+@app.route("/update", methods=["GET", "POST"])
 def update_readings():
-    keys = cache.keys("*")
+    global devices
+    global stats_data
     devices.clear()
+    stats_data.clear()
+    keys = cache.keys("*")
+
+    for d in ["CPU", "GPU", "RAM"]:
+        response = requests.get(f"http://stats:5252/device/{d}/get")
+        if response.status_code == 200:
+            stats_data[d] = response.json() # Had format response as JSON to get this working
+        else:
+            return f"Error getting stats! Data received: {stats_data}"
 
     for key in keys:
         data = cache.hgetall(key)
@@ -49,8 +60,13 @@ def update_readings():
             "conv_temp": converted,
             "load": data.get("load"),
             "speed": speed,
-            "time": readable_time
+            "time": readable_time,
+            "raw_time": time
         }
+    
+    # Sort by timestamp so new readings at top
+    sorted_devices = sorted(devices.items(), key=lambda x: x[1]['raw_time'], reverse=True)
+    devices = dict(sorted_devices)
     return redirect("/aggregator")
 
 
