@@ -40,6 +40,7 @@ def device_stats(device):
     stats_dict = {}
     metrics = ["temperature", "load", "speed"]
 
+    # Put all stats data in a dictionary for easy communication
     for m in metrics:
         data = get_data(device, m)
         if data:

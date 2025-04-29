@@ -28,7 +28,7 @@ def submit_data():
             "time": timestamp
         }
 
-        key = f"{device}@{int(timestamp)}" # Unique key
+        key = f"{device}@{int(timestamp)}" # Unique key for each submission
         cache.hset(key, mapping=data)
         return f"""
             <p>Data posted successfully! Received the following:</p>
