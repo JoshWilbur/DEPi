@@ -16,7 +16,7 @@ Pi cluster in the making... more to come in a few weeks.
 
 * Parallel programming
 * IoT management
-* Pi-Hole DNS ad-blocking
+* DNS server
 * NAS storage
 * Media center
 * VPN to home network

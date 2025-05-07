@@ -3,10 +3,13 @@
 The software stack and configuration for DEPi is here. This is mostly for my own purposes in case I need to reinstall. Making it public in case it can help anyone else.
 
 **Containers Running Currently**
+
 * Portainer: Management of containers
 * Technitium: DNS server
-* Prometheus + Grafana + Node Exporter: Cluster monitoring
+* Focalboard: Jira-like planning
 * Code Server: Remote code environment
+* PiVPN: Not a container, but just as useful for Wireguard
+* Nextcloud: self-hosted drive
 
 # DEPi Setup
 
@@ -39,6 +42,7 @@ After this, the cluster is "working" in the most basic sense. However, it lacks 
 
 **Docker Compose**
 See docker-compose.yml as it contains all of my containers and setup. I'm using Docker swarm to deploy across my nodes.
+
 * Deploy swarm with `docker stack deploy -c docker-compose.yml DEPi-Stack`
 * Check with `docker stack services DEPi-Stack`
 * Remove swarm with `docker stack rm DEPi-Stack`
@@ -52,7 +56,7 @@ See docker-compose.yml as it contains all of my containers and setup. I'm using 
 
 **WireGuard**
 I tried out two different ways to run WG. The Docker solution seemed much simpler, but leaving the manual way up for future reference.\\
-UPDATE: I'm switching to a router-based VPN for security reasons.
+UPDATE: I'm switching to a router-based VPN for security reasons. Do note that setting it up can be a pain.
 
 * To install, run `sudo apt install wireguard wireguard-tools -y`
 * Generate public and private keys `wg genkey | tee wg_privatekey | wg pubkey > wg_publickey`
@@ -63,4 +67,4 @@ UPDATE: I'm switching to a router-based VPN for security reasons.
 * Enable at boot with `sudo systemctl enable wg-quick@wg0`
 
 **Final Notes**
-Beyond this point, any further cluster setup is user dependant. 
+Beyond this point, any further cluster setup is user dependant.

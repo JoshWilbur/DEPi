@@ -4,7 +4,7 @@ Simply put, a list of things to do.
 
 **General**
 
-* Fix: WG
+* Make independant stacks/yml files
 * Backup config files/settings
 * Picture of Cluster
 * Make README nicer

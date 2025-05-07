@@ -1,4 +1,5 @@
 // Serial version of conway, measuring performance with wall-clock time
+// I made this version initially as my PC doesn't have PAPI
 // Compile with: gcc conway_serial.c -lncurses -o gol_serial
 #include <stdio.h>
 #include <stdlib.h>
