@@ -8,8 +8,9 @@ The software stack and configuration for DEPi is here. This is mostly for my own
 * Technitium: DNS server
 * Focalboard: Jira-like planning
 * Code Server: Remote code environment
-* PiVPN: Not a container, but just as useful for Wireguard
-* Nextcloud: self-hosted drive
+* PiVPN: Not a container, but useful for Wireguard
+* Nextcloud: Self-hosted drive
+* Miniflux: News feed
 
 # DEPi Setup
 

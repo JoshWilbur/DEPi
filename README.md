@@ -2,6 +2,8 @@
 
 Pi cluster in the making... more to come in a few weeks.
 
+![DEPi Image](/Docs/DEPi_5-12-2025.png)
+
 # Hardware
 
 **Current Setup:**

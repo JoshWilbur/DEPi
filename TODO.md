@@ -11,12 +11,8 @@ Simply put, a list of things to do.
 
 **Software**
 
-* Immich: Self-hosted videos/photos
-* Nextcloud: Self-hosted cloud
-* Paperless ngx: Self-hosted documents
 * Jellyfin/Jellyfi: Media center
 * Firefly-III: Finances
-* Vaultwarden: PW manager
 * HPL Linpack: Performance testing
 * Minecraft server
 
