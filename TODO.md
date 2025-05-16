@@ -5,14 +5,12 @@ Simply put, a list of things to do.
 **General**
 
 * Make independant stacks/yml files
-* Backup config files/settings
-* Picture of Cluster
 * Make README nicer
 
 **Software**
 
 * Jellyfin/Jellyfi: Media center
-* Firefly-III: Finances
+* Map server
 * HPL Linpack: Performance testing
 * Minecraft server
 

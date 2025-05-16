@@ -3,7 +3,7 @@ import psutil
 import socket
 
 def get_system_info():
-    # Dict for system information
+    # Dict for system information 
     sys_info = {
         "OS": platform.system(),
         "OS Release": platform.release(),
