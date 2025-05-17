@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  monitor:
+    build: .
+    container_name: cluster-monitor
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

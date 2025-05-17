@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cluster Monitor</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #fff;
+    color: #222;
+  }
+  .dark-mode {
+    background-color: #121212;
+    color: #eee;
+  }
+  button {
+    margin-bottom: 20px;
+    padding: 8px 15px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  h1, h2 {
+    margin-bottom: 10px;
+  }
+  .metrics-group {
+    margin-bottom: 30px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    border: 1px solid #888;
+    padding: 6px 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #ddd;
+  }
+  .dark-mode th {
+    background-color: #333;
+  }
+</style>
+</head>
+<body>
+  <button id="toggle-dark">Toggle Dark Mode</button>
+  <button id="refresh">Update Stats</button>
+  <h1>Cluster Monitor</h1>
+
+  <div class="metrics-group" id="system-info">
+    <h2>System Info</h2>
+    <table>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="metrics-group" id="runtime-metrics">
+    <h2>Runtime Metrics</h2>
+    <table>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="metrics-group" id="network-info">
+    <h2>Network Info</h2>
+    <table>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="metrics-group" id="uptime">
+    <h2>Uptime</h2>
+    <p id="uptime-text"></p>
+  </div>
+
+<script>
+  const toggleBtn = document.getElementById("toggle-dark");
+  toggleBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+  });
+
+  const refreshBtn = document.getElementById("refresh");
+  refreshBtn.addEventListener("click", () => {
+    fetchMetrics();
+  });
+
+  function renderTable(id, data) {
+    const tbody = document.querySelector(`#${id} tbody`);
+    tbody.innerHTML = "";
+
+    // Map keys to units
+    const unitsMap = {
+      "CPU Cores (Logical)": "",
+      "CPU Cores (Physical)": "",
+      "Boot Time": "",
+      "Architecture": "",
+      "Machine": "",
+      "Node": "",
+      "OS": "",
+      "OS Release": "",
+      "Platform": "",
+      "Processor": "",
+      "Python Version": "",
+      "RAM Total Gb": "GB",
+
+      "Cpu Percent": "%",
+      "Disk Free": "GB",
+      "Disk Percent": "%",
+      "Disk Total": "GB",
+      "Disk Used": "GB",
+      "Memory Active": "GB",
+      "Memory Available": "GB",
+      "Memory Buffers": "GB",
+      "Memory Cached": "GB",
+      "Memory Free": "GB",
+      "Memory Inactive": "GB",
+      "Memory Percent": "%",
+      "Memory Shared": "GB",
+      "Memory Slab": "GB",
+      "Memory Total": "GB",
+      "Memory Used": "GB",
+      "Net Io Bytes Recv": "KB",
+      "Net Io Bytes Sent": "KB",
+      "Net Io Dropin": "",
+      "Net Io Dropout": "",
+      "Net Io Errin": "",
+      "Net Io Errout": "",
+      "Net Io Packets Recv": "",
+      "Net Io Packets Sent": "",
+
+      "Hostname": "",
+      "Ip Address": "",
+    };
+
+    for (const [key, val] of Object.entries(data)) {
+      let displayVal = val;
+
+      // Append unit if value is a number and unit exists
+      if (typeof val === "number" && unitsMap[key]) {
+        displayVal = `${val} ${unitsMap[key]}`;
+      }
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<th>${key.replace(/_/g, " ")}</th><td>${displayVal}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function fetchMetrics() {
+    fetch("/metrics")
+      .then(res => res.json())
+      .then(data => {
+        renderTable("system-info", data.system_info);
+        renderTable("runtime-metrics", data.runtime_metrics);
+        renderTable("network-info", data.network_info);
+        document.getElementById("uptime-text").textContent = data.uptime;
+      })
+      .catch(err => {
+        console.error("Error fetching metrics:", err);
+      });
+  }
+
+  // Fetch on page load
+  fetchMetrics();
+</script>
+</body>
+</html>
