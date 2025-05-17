@@ -5,166 +5,456 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cluster Monitor</title>
 <style>
+  /* Dark mode background and font */
   body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #fff;
-    color: #222;
-  }
-  .dark-mode {
     background-color: #121212;
     color: #eee;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  button {
-    margin-bottom: 20px;
-    padding: 8px 15px;
-    font-size: 16px;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  #controls {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  button, label {
     cursor: pointer;
+    font-weight: 600;
+    user-select: none;
   }
-  h1, h2 {
-    margin-bottom: 10px;
+
+  button {
+    background-color: #2e2e2e;
+    color: #eee;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
   }
-  .metrics-group {
-    margin-bottom: 30px;
+  button:hover {
+    background-color: #444;
   }
-  table {
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  #metrics-section {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /* Limit height to viewport minus header and controls */
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    padding-right: 0.5rem;
   }
-  th, td {
-    border: 1px solid #888;
-    padding: 6px 10px;
-    text-align: left;
+
+  .metric-card {
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
   }
-  th {
-    background-color: #ddd;
+
+  .metric-card h2 {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.3rem;
   }
-  .dark-mode th {
-    background-color: #333;
+
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+    border-bottom: 1px solid #2a2a2a;
+    font-size: 0.95rem;
   }
+
+  .stat:last-child {
+    border-bottom: none;
+  }
+
+  .label {
+    font-weight: 600;
+    color: #bbb;
+    flex-shrink: 0;
+  }
+
+  .value {
+    font-weight: 700;
+    color: #eee;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .unit {
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  .usage-bar {
+    width: 80px;
+    height: 10px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+
+  .usage-fill {
+    height: 100%;
+    background: #4caf50;
+    transition: width 0.3s ease;
+  }
+
+  /* Scrollbar styling for metrics section */
+  #metrics-section::-webkit-scrollbar {
+    width: 8px;
+  }
+  #metrics-section::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+  }
+  #metrics-section::-webkit-scrollbar-track {
+    background: #222;
+  }
+
 </style>
 </head>
 <body>
-  <button id="toggle-dark">Toggle Dark Mode</button>
-  <button id="refresh">Update Stats</button>
-  <h1>Cluster Monitor</h1>
 
-  <div class="metrics-group" id="system-info">
-    <h2>System Info</h2>
-    <table>
-      <tbody></tbody>
-    </table>
-  </div>
+<h1>Cluster Monitor</h1>
 
-  <div class="metrics-group" id="runtime-metrics">
-    <h2>Runtime Metrics</h2>
-    <table>
-      <tbody></tbody>
-    </table>
-  </div>
+<div id="controls">
+  <button id="refresh-btn" aria-label="Refresh metrics">Refresh Data</button>
+  <label for="toggle-minimal">Minimal Stats</label>
+  <input type="checkbox" id="toggle-minimal" />
+</div>
 
-  <div class="metrics-group" id="network-info">
-    <h2>Network Info</h2>
-    <table>
-      <tbody></tbody>
-    </table>
-  </div>
+<div id="metrics-section" aria-live="polite" aria-atomic="true">
+  Loading metrics...
+</div>
 
-  <div class="metrics-group" id="uptime">
-    <h2>Uptime</h2>
-    <p id="uptime-text"></p>
-  </div>
+<div id="self-monitor" style="margin-top: 1rem; max-width: 900px; width: 100%; text-align: right; color: #aaa; font-size: 0.9rem;">
+  Self Monitor (Central Server) — CPU: <span id="self-cpu">- %</span>, Memory: <span id="self-mem">-</span>
+</div>
 
 <script>
-  const toggleBtn = document.getElementById("toggle-dark");
-  toggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-  });
+  const METRICS_API = "/metrics";
+  const SELF_API = "/api/self";
 
-  const refreshBtn = document.getElementById("refresh");
-  refreshBtn.addEventListener("click", () => {
-    fetchMetrics();
-  });
+  let minimalMode = false;
+  let metricsData = null;
 
-  function renderTable(id, data) {
-    const tbody = document.querySelector(`#${id} tbody`);
-    tbody.innerHTML = "";
+  // Format number with commas and decimals
+  function fmtNumber(num) {
+    if (typeof num !== "number") return num;
+    return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
 
-    // Map keys to units
-    const unitsMap = {
-      "CPU Cores (Logical)": "",
-      "CPU Cores (Physical)": "",
-      "Boot Time": "",
-      "Architecture": "",
-      "Machine": "",
-      "Node": "",
-      "OS": "",
-      "OS Release": "",
-      "Platform": "",
-      "Processor": "",
-      "Python Version": "",
-      "RAM Total Gb": "GB",
+  // Format temperature with degree symbol and 1 decimal
+  function formatTemp(temp) {
+    if (typeof temp !== "number") return temp;
+    return temp.toFixed(1) + "°C";
+  }
 
-      "Cpu Percent": "%",
-      "Disk Free": "GB",
-      "Disk Percent": "%",
-      "Disk Total": "GB",
-      "Disk Used": "GB",
-      "Memory Active": "GB",
-      "Memory Available": "GB",
-      "Memory Buffers": "GB",
-      "Memory Cached": "GB",
-      "Memory Free": "GB",
-      "Memory Inactive": "GB",
-      "Memory Percent": "%",
-      "Memory Shared": "GB",
-      "Memory Slab": "GB",
-      "Memory Total": "GB",
-      "Memory Used": "GB",
-      "Net Io Bytes Recv": "KB",
-      "Net Io Bytes Sent": "KB",
-      "Net Io Dropin": "",
-      "Net Io Dropout": "",
-      "Net Io Errin": "",
-      "Net Io Errout": "",
-      "Net Io Packets Recv": "",
-      "Net Io Packets Sent": "",
+  // Format bytes to human-readable (KB, MB, GB)
+  function formatBytes(bytes) {
+    if (typeof bytes !== "number") return bytes;
+    if (bytes < 1024) return bytes + " B";
+    let units = ["KB", "MB", "GB", "TB"];
+    let i = -1;
+    do {
+      bytes = bytes / 1024;
+      i++;
+    } while (bytes >= 1024 && i < units.length - 1);
+    return bytes.toFixed(2) + " " + units[i];
+  }
 
-      "Hostname": "",
-      "Ip Address": "",
-    };
+  // Create usage bar element
+  function createUsageBar(percent) {
+    const bar = document.createElement("div");
+    bar.classList.add("usage-bar");
+    const fill = document.createElement("div");
+    fill.classList.add("usage-fill");
+    const capped = Math.min(100, Math.max(0, percent));
+    fill.style.width = capped + "%";
+    bar.appendChild(fill);
+    return bar;
+  }
 
-    for (const [key, val] of Object.entries(data)) {
-      let displayVal = val;
+  // Create one row of stat label + value (+ unit optionally)
+  function createStatRow(label, value, unit = "", isPercentOrTemp = false) {
+    const stat = document.createElement("div");
+    stat.classList.add("stat");
 
-      // Append unit if value is a number and unit exists
-      if (typeof val === "number" && unitsMap[key]) {
-        displayVal = `${val} ${unitsMap[key]}`;
+    const lbl = document.createElement("div");
+    lbl.classList.add("label");
+    lbl.textContent = label;
+
+    const val = document.createElement("div");
+    val.classList.add("value");
+
+    // Value formatting
+    if (isPercentOrTemp) {
+      if (unit === "°C") {
+        val.textContent = formatTemp(value);
+      } else {
+        val.textContent = fmtNumber(value);
+        stat.appendChild(createUsageBar(value));
       }
+    } else {
+      if (typeof value === "number") {
+        val.textContent = value.toFixed(2);
+      } else {
+        val.textContent = value;
+      }
+    }
 
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<th>${key.replace(/_/g, " ")}</th><td>${displayVal}</td>`;
-      tbody.appendChild(tr);
+    // Append unit next to value if provided and not already included
+    if (unit && !val.textContent.includes(unit)) {
+      const unitSpan = document.createElement("span");
+      unitSpan.classList.add("unit");
+      unitSpan.textContent = unit;
+      val.appendChild(unitSpan);
+    }
+
+    stat.appendChild(lbl);
+    stat.appendChild(val);
+    return stat;
+  }
+
+  // Render full metrics view
+  function renderFull(metrics) {
+    const container = document.createElement("div");
+
+    // System Info Card (including hostname)
+    const sysCard = document.createElement("div");
+    sysCard.classList.add("metric-card");
+    const sysTitle = document.createElement("h2");
+    sysTitle.textContent = "System Info";
+    sysCard.appendChild(sysTitle);
+    const sysInfo = metrics.system_info;
+
+    for (const [k, v] of Object.entries(sysInfo)) {
+      if (k.toLowerCase() === "processor") continue; // removed processor data per user
+      const displayKey = (k === "Node") ? "Hostname" : k;
+      sysCard.appendChild(createStatRow(displayKey, v));
+    }
+    container.appendChild(sysCard);
+
+    // Runtime Metrics Card
+    const runtimeCard = document.createElement("div");
+    runtimeCard.classList.add("metric-card");
+    const runtimeTitle = document.createElement("h2");
+    runtimeTitle.textContent = "Runtime Metrics";
+    runtimeCard.appendChild(runtimeTitle);
+
+    // Add all runtime metrics except temperature (handled separately)
+    for (const [k, v] of Object.entries(metrics.runtime_metrics)) {
+      // Skip temperature here
+      if (k.toLowerCase().includes("temp")) continue;
+      let unit = "";
+      if (k.toLowerCase().includes("percent")) unit = "%";
+      else if (k.toLowerCase().includes("disk") || k.toLowerCase().includes("memory")) unit = "GB";
+      else if (k.toLowerCase().includes("net io bytes")) unit = "KB";
+      else if (k.toLowerCase().includes("packets") || k.toLowerCase().includes("drop") || k.toLowerCase().includes("err")) unit = "";
+
+      const isPercent = k.toLowerCase().includes("percent");
+      runtimeCard.appendChild(createStatRow(k, v, unit, isPercent));
+    }
+    container.appendChild(runtimeCard);
+
+    // Temperature Card (if present)
+    if (metrics.temperature && Object.keys(metrics.temperature).length) {
+      const tempCard = document.createElement("div");
+      tempCard.classList.add("metric-card");
+      const tempTitle = document.createElement("h2");
+      tempTitle.textContent = "Temperature Sensors";
+      tempCard.appendChild(tempTitle);
+
+      for (const [sensor, val] of Object.entries(metrics.temperature)) {
+        tempCard.appendChild(createStatRow(sensor, val, "°C", true));
+      }
+      container.appendChild(tempCard);
+    }
+
+    // Network Info Card
+    const netCard = document.createElement("div");
+    netCard.classList.add("metric-card");
+    const netTitle = document.createElement("h2");
+    netTitle.textContent = "Network Info";
+    netCard.appendChild(netTitle);
+
+    for (const [k, v] of Object.entries(metrics.network_info)) {
+      netCard.appendChild(createStatRow(k, v));
+    }
+    container.appendChild(netCard);
+
+    // Uptime Card
+    const uptimeCard = document.createElement("div");
+    uptimeCard.classList.add("metric-card");
+    const uptimeTitle = document.createElement("h2");
+    uptimeTitle.textContent = "Uptime";
+    uptimeCard.appendChild(uptimeTitle);
+    uptimeCard.appendChild(createStatRow("Uptime", metrics.uptime));
+    container.appendChild(uptimeCard);
+
+    return container;
+  }
+
+  // Render minimal metrics view
+  function renderMinimal(metrics) {
+    const container = document.createElement("div");
+
+    // Show only critical stats + temperature if present
+
+    // System Info minimal: Hostname only
+    const sysCard = document.createElement("div");
+    sysCard.classList.add("metric-card");
+    const sysTitle = document.createElement("h2");
+    sysTitle.textContent = "System Info";
+    sysCard.appendChild(sysTitle);
+    const sysInfo = metrics.system_info;
+    if (sysInfo.Node) {
+      sysCard.appendChild(createStatRow("Hostname", sysInfo.Node));
+    }
+    container.appendChild(sysCard);
+
+    // Runtime minimal: CPU Percent, Memory Percent, Disk Percent only
+    const runtimeCard = document.createElement("div");
+    runtimeCard.classList.add("metric-card");
+    const runtimeTitle = document.createElement("h2");
+    runtimeTitle.textContent = "Runtime Metrics";
+    runtimeCard.appendChild(runtimeTitle);
+
+    const rt = metrics.runtime_metrics;
+    if (rt["Cpu Percent"] !== undefined) {
+      runtimeCard.appendChild(createStatRow("CPU Usage", rt["Cpu Percent"], "%", true));
+    }
+    if (rt["Memory Percent"] !== undefined) {
+      runtimeCard.appendChild(createStatRow("Memory Usage", rt["Memory Percent"], "%", true));
+    }
+    if (rt["Disk Percent"] !== undefined) {
+      runtimeCard.appendChild(createStatRow("Disk Usage", rt["Disk Percent"], "%", true));
+    }
+    container.appendChild(runtimeCard);
+
+    // Temperature minimal if available
+    if (metrics.temperature && Object.keys(metrics.temperature).length) {
+      const tempCard = document.createElement("div");
+      tempCard.classList.add("metric-card");
+      const tempTitle = document.createElement("h2");
+      tempTitle.textContent = "Temperature Sensors";
+      tempCard.appendChild(tempTitle);
+
+      for (const [sensor, val] of Object.entries(metrics.temperature)) {
+        tempCard.appendChild(createStatRow(sensor, val, "°C", true));
+      }
+      container.appendChild(tempCard);
+    }
+
+    // Network minimal: Hostname + IP only
+    const netCard = document.createElement("div");
+    netCard.classList.add("metric-card");
+    const netTitle = document.createElement("h2");
+    netTitle.textContent = "Network Info";
+    netCard.appendChild(netTitle);
+
+    const net = metrics.network_info;
+    if (net.Hostname) netCard.appendChild(createStatRow("Hostname", net.Hostname));
+    if (net["Ip Address"]) netCard.appendChild(createStatRow("IP Address", net["Ip Address"]));
+    container.appendChild(netCard);
+
+    // Uptime minimal
+    const uptimeCard = document.createElement("div");
+    uptimeCard.classList.add("metric-card");
+    const uptimeTitle = document.createElement("h2");
+    uptimeTitle.textContent = "Uptime";
+    uptimeCard.appendChild(uptimeTitle);
+    uptimeCard.appendChild(createStatRow("Uptime", metrics.uptime));
+    container.appendChild(uptimeCard);
+
+    return container;
+  }
+
+  async function fetchMetrics() {
+    try {
+      const response = await fetch(METRICS_API);
+      if (!response.ok) throw new Error("Network error");
+      metricsData = await response.json();
+      renderMetrics();
+    } catch (err) {
+      console.error("Failed to fetch metrics:", err);
+      const section = document.getElementById("metrics-section");
+      section.innerHTML = "<p style='color: #ef5350;'>Failed to load metrics.</p>";
     }
   }
 
-  function fetchMetrics() {
-    fetch("/metrics")
-      .then(res => res.json())
-      .then(data => {
-        renderTable("system-info", data.system_info);
-        renderTable("runtime-metrics", data.runtime_metrics);
-        renderTable("network-info", data.network_info);
-        document.getElementById("uptime-text").textContent = data.uptime;
-      })
-      .catch(err => {
-        console.error("Error fetching metrics:", err);
-      });
+  async function fetchSelfMonitor() {
+    try {
+      const response = await fetch(SELF_API);
+      if (!response.ok) throw new Error("Network error");
+      const data = await response.json();
+      document.getElementById("self-cpu").innerText = fmtNumber(data.cpu) + " %";
+      document.getElementById("self-mem").innerText = formatBytes(data.memory * 1024 * 1024);
+    } catch (err) {
+      console.error("Failed to fetch self monitor:", err);
+    }
   }
 
-  // Fetch on page load
+  function renderMetrics() {
+    const section = document.getElementById("metrics-section");
+    if (!metricsData) return;
+    section.innerHTML = "";
+
+    if (minimalMode) {
+      section.appendChild(renderMinimal(metricsData));
+    } else {
+      section.appendChild(renderFull(metricsData));
+    }
+  }
+
+  document.getElementById("refresh-btn").addEventListener("click", () => {
+    fetchMetrics();
+    fetchSelfMonitor();
+  });
+
+  document.getElementById("toggle-minimal").addEventListener("change", (e) => {
+    minimalMode = e.target.checked;
+    renderMetrics();
+  });
+
+  // Initial load
   fetchMetrics();
+  fetchSelfMonitor();
+
+  // Refresh every 60 seconds
+  setInterval(() => {
+    fetchMetrics();
+    fetchSelfMonitor();
+  }, 60000);
 </script>
+
 </body>
 </html>
