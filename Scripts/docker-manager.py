@@ -11,7 +11,14 @@ STACKS = {
     "DEPi-monitor": "/home/jlw/DEPi/Cluster-Monitor/docker-compose.yml"
 }
 
-def start_stack(path, stack_name):
+def run_command(command):
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Command failed with exception: {e}")
+        sys.exit(e.returncode)
+
+def start_stack(stack_name, path):
     print(f"Starting {stack_name} from {path}...")
     run_command(["docker", "stack", "deploy", "-c", path, stack_name])
     
