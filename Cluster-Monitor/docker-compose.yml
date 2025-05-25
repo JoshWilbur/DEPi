@@ -9,3 +9,7 @@ services:
       - "5000:5000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints: [node.hostname == DEPi-Main]
+      replicas: 1
