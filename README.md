@@ -16,6 +16,7 @@ I host a variety of services to gain experience with sysadmin work and save cost
 | Nextcloud                   | Self-hosted cloud                 | Feature-rich cloud that supports mobile access.                                                        | Google Drive |
 | Miniflux                    | RSS feed                          | Works as intended, nothing special                                                                     | RSS.app      |
 | EmulatorJS                  | ROM Emulator                      | Works for all retro consoles                                                                           | NES/SNES     |
+| Gramps Web                  | Family Tree + Geneology           | Allows family tree and map creation. Very in-depth<br />passion project                                | Ancestry.com |
 | Docker Bench<br />Security* | Security audit for Docker         | Only ran occasionally after updates                                                                    | N/A          |
 | Focalboard*                 | Ticket-based planner              | Useful for small projects, unused otherwise                                                            | Jira         |
 

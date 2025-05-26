@@ -12,7 +12,7 @@ Simply put, a list of things to do.
 **Software**
 
 * Reverse proxy with HTTPS
-* Gramps Web (https://www.grampsweb.org/)
+* Gramps Web sync (https://www.grampsweb.org/administration/sync/)
 * Falco (https://falco.org/docs/setup/container/)
 * Minecraft server (https://www.auto-mcs.co m/?ref=selfh.st)
 * Navidrome music player (https://github.com/navidrome/navidrome/)

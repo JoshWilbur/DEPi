@@ -8,7 +8,8 @@ STACKS = {
     "DEPi-core": f"{SWARM_DIR}/core.yml",
     "DEPi-auxiliary": f"{SWARM_DIR}/aux.yml",
     "DEPi-Nextcloud": f"{SWARM_DIR}/nextcloud.yml",
-    "DEPi-monitor": "/home/jlw/DEPi/Cluster-Monitor/docker-compose.yml"
+    "DEPi-monitor": "/home/jlw/DEPi/Cluster-Monitor/docker-compose.yml",
+    "DEPi-gramps": f"{SWARM_DIR}/gramps.yml",
 }
 
 def run_command(command):
