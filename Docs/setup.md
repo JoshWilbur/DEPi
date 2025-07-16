@@ -56,7 +56,7 @@ See docker-compose.yml as it contains all of my containers and setup. I'm using 
 * DNS filtering should be active now
 
 **WireGuard**
-I tried out two different ways to run WG. The Docker solution seemed much simpler, but leaving the manual way up for future reference.\\
+I tried out two different ways to run WG. The Docker solution seemed much simpler, but leaving the manual way up for future reference.
 UPDATE: I'm switching to a router-based VPN for security reasons. Do note that setting it up can be a pain.
 
 * To install, run `sudo apt install wireguard wireguard-tools -y`
