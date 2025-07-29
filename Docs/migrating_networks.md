@@ -7,3 +7,4 @@ The software stack and configuration for DEPi is here. This is mostly for my own
 * Do one of the following
 * Remove all files under /etc/NetworkManager/system-connections
 * Edit /etc/systemd/network/10-eth0.network
+* Recreate docker swarm
